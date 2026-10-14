@@ -1,5 +1,10 @@
 # PPSD 数据资产说明
 
+> ⚠️ **本仓库只包含 `samples/`（各数据文件的真实片段）和 `schema.sql`（建表脚本）。**
+> 下文描述的 `raw/` `browse/` `derived/` `reference/` 等完整数据目录**不在本仓库内**
+> （体积大且数据归属实验室，不进公开仓库）—— 留档仅供了解原始数据的全貌，
+> 需要完整数据请从官网 <http://cbi.njau.edu.cn/PPSD> 公开接口重新采集。
+
 本目录存放 PPSD（Plant Phased siRNA Database，植物 phased siRNA 数据库）的**真实数据**。
 
 ## 数据来源与获取方式
