@@ -1,0 +1,20 @@
+{
+  "name": "ppsd-backend",
+  "version": "0.1.0",
+  "private": true,
+  "description": "PPSD (Plant Phased siRNA Database) 本地复刻 —— Node.js + Express + PostgreSQL 后端",
+  "type": "module",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js",
+    "db:load": "node src/db/load.js",
+    "db:reset": "node src/db/load.js --reset"
+  },
+  "dependencies": {
+    "@electric-sql/pglite": "^0.5.8",
+    "cors": "^2.8.6",
+    "express": "^5.2.1",
+    "pg": "^8.23.0"
+  }
+}

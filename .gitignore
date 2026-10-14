@@ -1,0 +1,36 @@
+# 依赖与构建产物
+node_modules
+dist
+dist-demo
+
+# 环境变量：数据库连接串在里面，绝对不能提交
+.env
+.env.local
+.env.*.local
+
+# 本地数据库文件（如果用 pglite 驱动的话）
+.pglite*
+
+# 日志
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# 编辑器
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# 数据：公开仓库只保留 data/samples/ + data/schema.sql，
+# 采集来的整库数据（raw/ browse/ derived/）一律不进版本库
+data/raw/
+data/browse/
+data/derived/
