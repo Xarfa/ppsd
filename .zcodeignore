@@ -1,0 +1,77 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+node_modules
+dist
+dist-ssr
+*.local
+
+# 环境变量：数据库连接串在里面，绝对不能提交
+.env
+.env.local
+.env.*.local
+
+# 本地数据库文件（如果用 pglite 驱动的话）
+.pglite*
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# ---------------------------------------------------------------------------
+# data/ 目录的取舍
+#
+# data/ 里是从公开站点采集的真实数据，约 130 MB。默认先全部提交，
+# 好处是换台机器 clone 下来 `npm run db:load` 就能跑，不用重新采集。
+#
+# 如果嫌仓库太大，把下面几行取消注释：只保留 derived/ 里整理好的小文件，
+# 大文件（官方原始导出 + 逐物种 JSON）不进版本库。
+# 这样 data/ 只剩约 25 MB，足够支撑本地 demo。
+# ---------------------------------------------------------------------------
+# data/raw/
+# data/browse/
+.review/
+
+# ===== ↑ 以上同步自 .gitignore（「从 .gitignore 同步」只重写以上部分）=====
+.git/
+.hg/
+.svn/
+bower_components/
+jspm_packages/
+__pycache__/
+site-packages/
+venv/
+coverage/
+htmlcov/
+lcov-report/
+cmakefiles/
+cmake-build-*/
+bazel-*/
+pods/
+deriveddata/
+storybook-static/
+playwright-report/
+test-results/
+allure-results/
+allure-report/
+cdk.out/
+*.egg-info/
+*.dist-info/
+eggs/
+pip-wheel-metadata/
+wheels/
+# ----- ↑ 以上为 ZCode 默认排除规则（自定义规则请写在本行下方，不会被同步/恢复改动）-----
+# 自定义规则写在下方（本行提示可删除）

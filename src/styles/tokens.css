@@ -1,0 +1,175 @@
+/* ==========================================================================
+   PPSD 设计令牌 (Design Tokens) — v2「Botanical Ink」
+   ---------------------------------------------------------------------------
+   全站所有颜色、字体、间距、圆角都从这里取。想换风格，改这一个文件就够了，
+   不需要动任何组件代码。
+
+   v2 视觉方向（在 v1 单色基础上演进，规则不变）：
+   · 底色是带一点绿意的暖纸白，正文用「墨绿黑」而不是纯黑 —— 数据密集的
+     界面长时间阅读更稳，也和"植物"主题呼应。
+   · 强调色从近黑换成深植物绿：出现在按钮、链接、选中态上。
+     状态语义（成功/警示/危险）恢复为低饱和的彩色，但仍然克制。
+   · 物种色板 --c-sp-*：8 个物种各占一个色相，绿/金/蓝/紫/青/橙/玫红/叶绿，
+     图例、表格圆点、图表系列共用 —— 用户在任何一个页面学会的颜色，
+     到另一个页面仍然成立。
+   · 字体：Space Grotesk（展示标题，拉丁字符）+ Inter（界面正文）
+     + IBM Plex Mono（基因号/序列/坐标/数字）。中文回退到黑体系，
+     永远不会回退到宋体。
+   ========================================================================== */
+
+:root {
+    /* ---------- 基底（纯白 + 墨绿黑） ---------- */
+    --c-bg:            #ffffff;   /* 页面底色（纯白） */
+    --c-surface:       #ffffff;   /* 卡片、表格底 */
+    --c-surface-sunk:  #f1f4f1;   /* 表头、斑马纹、代码块底 */
+    --c-border:        #e2e8e1;   /* 常规描边 */
+    --c-border-strong: #cbd5cc;   /* 更明确的分隔 */
+
+    --c-text:          #17231d;   /* 正文主色（墨绿黑） */
+    --c-text-2:        #3d4c44;   /* 次级正文 */
+    --c-text-3:        #6b7d73;   /* 辅助说明、字段名 */
+    --c-text-muted:    #9aa9a0;   /* 占位、禁用 */
+
+    /* ---------- 强调色：深植物绿 ---------- */
+    --c-accent:        #127a50;
+    --c-accent-hover:  #0c5f3d;
+    --c-accent-tint:   #e6f3ec;   /* 极浅底：选中行、提示块 */
+    --c-accent-border: #bfe0cf;
+
+    /* ---------- 渐变（hero、品牌、图表点缀） ---------- */
+    --grad-hero: linear-gradient(160deg, #0d2b1e 0%, #10382a 45%, #0b241a 100%);
+    --grad-brand: linear-gradient(135deg, #127a50 0%, #1a9a68 60%, #3bbf8a 100%);
+    --grad-amber: linear-gradient(135deg, #b97d14 0%, #e0a83c 100%);
+
+    /* ---------- hero 深色区块 ---------- */
+    --c-hero-bg:       #0d2b1e;
+    --c-hero-bg-2:     #10382a;
+    --c-hero-text:     #f2f7f3;
+    --c-hero-dim:      #a8bfb2;
+    --c-hero-accent:   #7fd6ac;
+
+    /* ---------- 状态语义（低饱和，不刺眼） ---------- */
+    --c-ok:            #127a50;
+    --c-ok-bg:         #e6f3ec;
+    --c-ok-border:     #bfe0cf;
+
+    --c-warn:          #9a6a10;
+    --c-warn-bg:       #faf3e2;
+    --c-warn-border:   #ecd9ae;
+
+    --c-danger:        #b23a48;
+    --c-danger-bg:     #faebed;
+    --c-danger-border: #ecc8cd;
+
+    --c-info:          #2d6a94;
+    --c-info-bg:       #e8f1f7;
+    --c-info-border:   #c4dcea;
+
+    /* ---------- 图表 ---------- */
+    --c-chart-1:       #127a50;
+    --c-chart-2:       #9aa9a0;
+    --c-chart-ink:     #17231d;   /* 深色 tooltip 用 */
+
+    /* 物种色板 —— 全站统一，图例/圆点/图表共用
+       八个色相刻意拉开距离，避免绿撞绿、橙撞橙（色觉安全考量） */
+    --c-sp-osa: #1f8f5f;   /* 水稻 Rice        emerald   */
+    --c-sp-gma: #8cbf3f;   /* 大豆 Soybean     lime      */
+    --c-sp-zma: #e0aa2e;   /* 玉米 Maize       amber     */
+    --c-sp-ath: #4fa3c7;   /* 拟南芥 Arabidopsis blue     */
+    --c-sp-vvi: #8e6bb5;   /* 葡萄 Grape       violet    */
+    --c-sp-bna: #2f9ea0;   /* 油菜 Rapeseed    teal      */
+    --c-sp-csi: #dd6540;   /* 柑橘 Orange      terracotta*/
+    --c-sp-ghi: #c25b78;   /* 棉花 Cotton      rose      */
+
+    /* ---------- 字体 ---------- */
+    --font-display: 'Space Grotesk', 'Inter Variable', 'Inter',
+                    'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif;
+    --font-sans:    'Inter Variable', 'Inter', -apple-system, BlinkMacSystemFont,
+                    'Segoe UI', 'Microsoft YaHei', 'PingFang SC', 'Hiragino Sans GB',
+                    sans-serif;
+    --font-mono:    'IBM Plex Mono', 'SFMono-Regular', Consolas, 'Liberation Mono',
+                    Menlo, monospace;
+
+    /* ---------- 字号阶梯（严格枚举，全站只用这七档） ----------
+       文字三档：12 / 14 / 15（+16 强调档）
+         12  --fs-xs    徽章、表头、字段标签、辅助标注
+         14  --fs-sm    表格数据、按钮、导航、次级正文
+         15  --fs-base  正文默认
+         16  --fs-md    导语、卡片标题、强调正文
+       标题阶梯：20 / 24 / 30 / 40（hero 另用 clamp）
+         20  --fs-lg    三级标题
+         24  --fs-xl    二级标题
+         30  --fs-2xl   一级标题
+         40  --fs-3xl   页面展示标题
+       不允许在组件里写第四种字号；等宽字体与同档文字同字号（最多 0.92em 微缩）。 */
+    --fs-xs:   0.75rem;     /* 12px */
+    --fs-sm:   0.875rem;    /* 14px */
+    --fs-base: 0.9375rem;   /* 15px */
+    --fs-md:   1rem;        /* 16px */
+    --fs-lg:   1.25rem;     /* 20px */
+    --fs-xl:   1.5rem;      /* 24px */
+    --fs-2xl:  1.875rem;    /* 30px */
+    --fs-3xl:  2.5rem;      /* 40px */
+    --fs-4xl:  3.25rem;     /* 52px（仅 hero clamp 上限参考） */
+
+    --lh-tight: 1.2;
+    --lh-base:  1.55;
+    --lh-loose: 1.75;
+
+    --fw-normal:   400;
+    --fw-medium:   500;
+    --fw-semibold: 600;
+    --fw-bold:     700;
+
+    /* ---------- 间距（4px 基准） ---------- */
+    --sp-1: 0.25rem;
+    --sp-2: 0.5rem;
+    --sp-3: 0.75rem;
+    --sp-4: 1rem;
+    --sp-5: 1.5rem;
+    --sp-6: 2rem;
+    --sp-7: 3rem;
+    --sp-8: 4rem;
+
+    /* ---------- 圆角（v2 稍微放松，卡片更现代但仍然利落） ---------- */
+    --r-sm: 4px;
+    --r-md: 7px;
+    --r-lg: 11px;
+    --r-xl: 16px;
+    --r-pill: 999px;
+
+    /* ---------- 阴影（比 v1 略暖、略柔） ---------- */
+    --shadow-none: none;
+    --shadow-sm: 0 1px 2px rgba(23, 35, 29, 0.05);
+    --shadow-md: 0 2px 6px rgba(23, 35, 29, 0.05), 0 10px 28px rgba(23, 35, 29, 0.07);
+    --shadow-lg: 0 8px 20px rgba(23, 35, 29, 0.09), 0 24px 56px rgba(23, 35, 29, 0.12);
+
+    /* ---------- 动效 ---------- */
+    --ease: cubic-bezier(0.4, 0, 0.2, 1);
+    --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+    --dur: 150ms;
+    --dur-slow: 320ms;
+
+    /* ---------- 布局 ---------- */
+    --page-max: 1400px;
+    --topbar-h: 56px;
+    --sidebar-w: 232px;
+    --aside-w: 280px;
+}
+
+/* 深色区块需要一套"反色"令牌。给容器加 .on-dark 即可，
+   子孙元素不需要写任何深色模式的条件判断。 */
+.on-dark {
+    --c-text:          var(--c-hero-text);
+    --c-text-2:        #cfe0d5;
+    --c-text-3:        var(--c-hero-dim);
+    --c-text-muted:    #6d8478;
+    --c-border:        rgba(242, 247, 243, 0.14);
+    --c-border-strong: rgba(242, 247, 243, 0.3);
+    --c-surface:       rgba(242, 247, 243, 0.05);
+    --c-surface-sunk:  rgba(242, 247, 243, 0.08);
+    --c-accent:        var(--c-hero-accent);
+    --c-accent-hover:  #a4e5c5;
+    --c-accent-tint:   rgba(127, 214, 172, 0.12);
+    --c-accent-border: rgba(127, 214, 172, 0.35);
+}

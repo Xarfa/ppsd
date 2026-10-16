@@ -1,0 +1,31 @@
+/* ==========================================================================
+   全局基础样式
+   —— Vite 模板自带的那份已经换掉了（备份在 style.css.vite-default.bak），
+      因为里面 `:root { color-scheme: light dark }` 之类的规则会跟 Bootstrap 打架，
+      还有 `#app { text-align: center }` 会把整页文字强行居中。
+
+   注意：body / #app 这些元素不在任何组件模板里，写 scoped 样式管不到它们，
+   所以这类全局规则必须放在这个文件（由 main.js 引入）里。
+   ========================================================================== */
+
+#app {
+    /* 页面内容默认左对齐，各页面自己控制局部对齐 */
+    text-align: left;
+}
+
+code {
+    font-family: Consolas, Menlo, monospace;
+    font-size: 0.85em;
+    color: #2c6ca3;
+    background: #eef4fb;
+    padding: 1px 5px;
+    border-radius: 3px;
+}
+
+a {
+    color: #2c6ca3;
+}
+
+a:hover {
+    color: #1b4d78;
+}
