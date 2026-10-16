@@ -34,9 +34,9 @@ let debounceTimer = null
 const pages = computed(() => [
     { kind: 'page', icon: '⌂', label: t('nav.home'), to: '/' },
     { kind: 'page', icon: '☰', label: t('nav.browse'), to: '/browse/osa' },
-    { kind: 'page', icon: '▦', label: t('nav.stats'), to: '/stats' },
     { kind: 'page', icon: '⌕', label: t('nav.search'), to: '/search' },
-    { kind: 'page', icon: '⌗', label: t('nav.blast'), to: '/blast' },
+    { kind: 'page', icon: '⎇', label: t('nav.blast'), to: '/blast' },
+    { kind: 'page', icon: '◔', label: t('nav.stats'), to: '/atlas' },
     { kind: 'page', icon: '⭳', label: t('nav.download'), to: '/download' },
     { kind: 'page', icon: '?', label: t('nav.help'), to: '/help' },
 ])

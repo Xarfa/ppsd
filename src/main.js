@@ -32,8 +32,8 @@ import PhasiRnaView from './views/PhasiRnaView.vue'
 import SearchView from './views/SearchView.vue'
 import DownloadView from './views/DownloadView.vue'
 import BlastView from './views/BlastView.vue'
-import HelpView from './views/HelpView.vue'
 import AtlasView from './views/AtlasView.vue'
+import HelpView from './views/HelpView.vue'
 import { setLocale, locale } from './i18n/index.js'
 
 /* 每个路径对应原站的一个页面：
@@ -42,8 +42,8 @@ import { setLocale, locale } from './i18n/index.js'
      /locus/:id            single_cluster.php     单位点详情
      /phasi-rna/:id        single_phasiRNA.php    单条 phasiRNA 详情
      /search               search.php             检索
-     /stats                statistics.php         统计图鉴
-     /blast                blast.php              序列比对
+     /blast                blast.php              BLAST 序列比对
+     /atlas                （新站新增）            统计图鉴
      /download             download.php           批量下载
      /help                 help.php               帮助 */
 /* 单文件演示版走 file:// 协议，history 模式不可用，改用 hash 路由 */
@@ -57,8 +57,8 @@ const router = createRouter({
         { path: '/locus/:id', name: 'locus', component: LocusDetailView },
         { path: '/phasi-rna/:id', name: 'phasi-rna', component: PhasiRnaView },
         { path: '/search', name: 'search', component: SearchView },
-        { path: '/stats', name: 'stats', component: AtlasView },
         { path: '/blast', name: 'blast', component: BlastView },
+        { path: '/atlas', name: 'atlas', component: AtlasView },
         { path: '/download', name: 'download', component: DownloadView },
         { path: '/help', name: 'help', component: HelpView },
         { path: '/:pathMatch(.*)*', redirect: '/' },

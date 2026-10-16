@@ -146,12 +146,16 @@ const messages = {
         'detail.plot.spacing': 'median spacing between neighbours',
         'detail.plot.plus': 'Forward (+)',
         'detail.plot.minus': 'Reverse (−)',
+        'detail.legacyPlot': 'Locus structure',
+        'detail.legacyPlot.hint': 'From the original PPSD site',
+        'detail.legacyPlot.missing':
+            'This deployment does not include the original figure. Ask the site admin to copy the plot/ directory from the old site.',
         'detail.sirna': 'PhasiRNA info',
         'detail.initiator': 'Initiator Info',
         'detail.noSirna': 'This locus has no phasiRNA records.',
         'detail.noInitiator': 'This locus has no phase initiator records.',
         'detail.noInitiatorHint':
-            'Only rice and soybean have initiator data — the public site only publishes download packages for those two species.',
+            'No triggering miRNA has been verified for this locus on the original site.',
 
         'f.position': 'Position',
         'f.length': 'Length',
@@ -473,11 +477,14 @@ const messages = {
         'detail.plot.spacing': '相邻间距中位数',
         'detail.plot.plus': '正链 (+)',
         'detail.plot.minus': '负链 (−)',
+        'detail.legacyPlot': '位点结构图',
+        'detail.legacyPlot.hint': '来自 PPSD 原站',
+        'detail.legacyPlot.missing': '当前部署未包含原站图片。请管理员把老站的 plot/ 目录复制到站点根目录下。',
         'detail.sirna': 'phasiRNA 信息',
         'detail.initiator': '起始因子信息',
         'detail.noSirna': '该位点没有 phasiRNA 记录。',
         'detail.noInitiator': '该位点没有相位起始因子记录。',
-        'detail.noInitiatorHint': '当前只有水稻和大豆有起始因子数据 —— 原站也只发布了这两个物种的下载包。',
+        'detail.noInitiatorHint': '原站没有为该位点记录到已验证的触发 miRNA。',
 
         'f.position': '位置',
         'f.length': '长度',

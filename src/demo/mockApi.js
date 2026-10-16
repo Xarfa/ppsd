@@ -8,10 +8,12 @@
  *
  * 快照裁剪说明（相对完整版，见 backend/scripts/build-demo-snapshot.mjs）：
  *   - 位点/phasiRNA：每物种按 phasiRNA 数量取前 20 + 5 个演示位点
+ *   - initiator：8 个物种全覆盖（水稻/大豆来自官方文件，其余 6 物种来自
+ *     data/scraped/initiator_scraped.tsv，2026-10-16 从老站公开页面抓取）
  *   - 靶基因明细只保留演示位点（OsaPHAS10g4348527 / GmaPHAS19gIntergenic）；
  *     其余 phasiRNA 保留聚合信息（Browse/位点表格完整可用），
  *     详情页的靶基因明细会提示为快照裁剪
- *   - 统计图鉴（atlas）与系统发育树（tree）不在快照内，页面会给出提示
+ *   - 统计图鉴（atlas）与系统发育树（tree）在快照内，页面完整可用
  *   - 序列比对（blast）与后端同算法，直接在内存快照上跑，功能完整
  */
 import demoDataBase64 from './demo-data.b64.txt?raw'

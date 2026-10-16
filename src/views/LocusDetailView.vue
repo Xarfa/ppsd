@@ -86,6 +86,19 @@ const medianGap = computed(() => {
     return gaps.length ? [...gaps].sort((a, b) => a - b)[Math.floor(gaps.length / 2)] : null
 })
 
+/* ---------- 老站位点结构图（plot/{物种}/{span}/{recorder}.jpg）----------
+   老站 single_cluster.php 里唯一在线运行的图表，按 recorder 编号直接取图。
+   图片属于静态资产，部署时把老站 plot/ 目录放到站点根下即可生效；
+   本地开发/演示版没有这个目录，img onerror 后显示提示。 */
+const legacyPlot = computed(() => {
+    const l = locus.value
+    if (!l?.recorder || !l.scientific_name) return null
+    const span = (l.phas_loci.match(/@(\d+)#/) || [])[1] || '21'
+    const dir = l.scientific_name.toLowerCase().replace(/\s+/g, '_')
+    return { url: `plot/${dir}/${span}/${l.recorder}.jpg`, species: dir, span, recorder: l.recorder }
+})
+const legacyPlotFailed = ref(false)
+
 /* ---------- 相位分布散点 ---------- */
 const { el: plotEl, setOption: setPlot } = useChart((rows) => {
     const mk = (r, i) => [r.start_in_transcript, i + 1, r.phasi_rna, r.length, r.strand]
@@ -348,6 +361,27 @@ watch(
                         </div>
                     </section>
 
+                    <!-- ===== 老站位点结构图 ===== -->
+                    <section v-if="legacyPlot" class="card" style="grid-column: span 12">
+                        <div class="card__head">
+                            <span class="card__title">{{ t('detail.legacyPlot') }}</span>
+                            <span class="card__hint">{{ t('detail.legacyPlot.hint') }}</span>
+                        </div>
+                        <div class="card__body" style="text-align: center">
+                            <img
+                                v-if="!legacyPlotFailed"
+                                :src="legacyPlot.url"
+                                :alt="t('detail.legacyPlot')"
+                                class="legacy-plot"
+                                @error="legacyPlotFailed = true"
+                            />
+                            <div v-else class="state">
+                                {{ t('detail.legacyPlot.missing') }}
+                                <div class="state__hint dim mono">{{ legacyPlot.url }}</div>
+                            </div>
+                        </div>
+                    </section>
+
                     <!-- ===== phasiRNA 列表 ===== -->
                     <section class="card" style="grid-column: span 12">
                         <div class="card__head">
@@ -532,5 +566,12 @@ watch(
 }
 @media (max-width: 900px) {
     .plot-grid { grid-template-columns: 1fr; }
+}
+.legacy-plot {
+    max-width: 100%;
+    height: auto;
+    border-radius: var(--radius-lg, 12px);
+    border: 1px solid var(--c-border);
+    background: #fff;
 }
 </style>

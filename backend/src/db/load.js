@@ -11,6 +11,8 @@
  *   derived/phasi_rna_seq_all_species.tsv                    104166 条
  *   raw/{osa,gma}_database_initiator.txt                     phase initiator
  *   raw/{osa,gma}_database_phasiRNA.txt                      phasiRNA + 靶基因
+ *   scraped/initiator_scraped.tsv                           其余 6 物种的 initiator
+ *                                                            （抓取自老站公开页面，见 data/scraped/）
  */
 import fs from 'node:fs';
 import path from 'node:path';
@@ -265,7 +267,11 @@ async function main() {
   }
 
   // ---- ⑤ initiator ------------------------------------------------------
-  log('导入 initiator（phase initiator，来自官方文件）…');
+  // 官方导出文件按降解组库重复记录（同一 miRNA 多行，仅后 4 列不同），
+  // 老站 single_cluster 页面是 select DISTINCT 语义（前 11 列）。
+  // 这里按前 11 列去重后导入，保证 8 个物种的 initiator 表语义一致、
+  // 且与老站展示的记录数一致（initiator_number 回填也以此为基准）。
+  log('导入 initiator（phase initiator，来自官方文件，DISTINCT 语义）…');
   for (const [abbr, file] of [['osa', 'osa_database_initiator.txt'], ['gma', 'gma_database_initiator.txt']]) {
     const fp = path.join(D, 'raw', file);
     if (!fs.existsSync(fp)) {
@@ -273,7 +279,15 @@ async function main() {
       continue;
     }
     const rows = [];
+    const seen = new Set();
+    let dup = 0;
     await readTsv(fp, (c) => {
+      const key = c.slice(0, 11).join('\u0001');
+      if (seen.has(key)) {
+        dup++;
+        return;
+      }
+      seen.add(key);
       rows.push([
         abbr, clean(c[0]), clean(c[1]), clean(c[2]), num(c[3]), num(c[4]), num(c[5]),
         num(c[6]), clean(c[7]), num(c[8]), clean(c[9]), clean(c[10]), clean(c[11]),
@@ -287,7 +301,39 @@ async function main() {
        'verified', 'degradome', 'category', 'deg_count', 't_plot'],
       rows,
     );
-    log(`  ${abbr}: initiator ${rows.length} 行`);
+    log(`  ${abbr}: initiator ${rows.length} 行（原始 ${rows.length + dup} 行，去重丢弃 ${dup} 行降解组重复）`);
+  }
+
+  // ---- ⑤-b 其余 6 物种的 initiator（抓取自老站公开页面）--------------------
+  // 老站 PostgreSQL 里 8 个物种都有 {spe}_initiator_21 表，但官网只发布水稻/大豆
+  // 的导出包。其余 6 物种的 initiator 记录由 data/scraped/scrape_loci.py 从
+  // single_cluster.php 公开页面抓取、convert.py 转换成 initiator_scraped.tsv
+  // （已与官方文件交叉验证：水稻 33/33、大豆 30/30 位点完全一致）。
+  {
+    const fp = path.join(D, 'scraped', 'initiator_scraped.tsv');
+    if (fs.existsSync(fp)) {
+      const rows = [];
+      const spSeen = new Set();
+      await readTsv(fp, (c) => {
+        if (officialSpecies.has(c[0])) return; // 水稻/大豆用官方文件，别重复灌
+        spSeen.add(c[0]);
+        rows.push([
+          c[0], clean(c[1]), clean(c[2]), clean(c[3]), num(c[4]), num(c[5]), num(c[6]),
+          num(c[7]), clean(c[8]), num(c[9]), clean(c[10]), clean(c[11]), clean(c[12]),
+          clean(c[13]), num(c[14]), clean(c[15]),
+        ]);
+      });
+      await batchInsert(
+        'initiator',
+        ['species', 'phas_gene', 'mirna', 'geneid', 'cleavege_site', 'target_pos_end',
+         'posmax_min', 'distance', 'initiator_seq', 'initiator_len', 'recordmarker',
+         'verified', 'degradome', 'category', 'deg_count', 't_plot'],
+        rows,
+      );
+      log(`  抓取数据: initiator ${rows.length} 行（物种 ${[...spSeen].join('/')}）`);
+    } else {
+      log('  跳过 initiator_scraped.tsv（不存在；需要先跑 data/scraped/scrape_loci.py + convert.py）');
+    }
   }
 
   // ---- 回填 species 的数量列 --------------------------------------------
@@ -297,6 +343,31 @@ async function main() {
       phas_loci_count = (SELECT count(*) FROM clusters  c WHERE c.species = s.abbr),
       phasi_rna_count = (SELECT count(*) FROM phasi_rna p WHERE p.species = s.abbr)
   `);
+
+  // ---- 用真实 initiator 记录回填 clusters.initiator_number -----------------
+  // 2026-09-25 从浏览页提取的 initiator_number 有错位（实测 770 个位点里
+  // 327 个与官方文件不符：有的少算、有的混成了官方文件原始行数）。
+  // initiator 记录现已覆盖 8 个物种，以实际记录数为准纠正这个字段
+  // （与老站 single_cluster 页面 "total initiators count" 同语义）。
+  //
+  // pglite 驱动灌完几十万行之后，同一个进程里继续 SELECT 会读不到数据行
+  // （WASM 后端丢了 dataRow 消息；INSERT 不受影响，落库数据始终正确，
+  // 换个新进程读也正常）。这里重连一次恢复读取，pg 驱动无此问题、
+  // closeDb() 后同样会自动重连，两种驱动行为一致。
+  await closeDb();
+  {
+    const { rows: before } = await query(`
+      SELECT count(*)::int AS n FROM clusters c
+      WHERE c.initiator_number IS DISTINCT FROM
+            (SELECT count(*)::int FROM initiator i WHERE i.phas_gene = c.phas_loci)
+    `);
+    await query(`
+      UPDATE clusters c SET initiator_number = sub.n
+      FROM (SELECT phas_gene, count(*)::int AS n FROM initiator GROUP BY phas_gene) sub
+      WHERE c.phas_loci = sub.phas_gene AND c.initiator_number IS DISTINCT FROM sub.n
+    `);
+    log(`回填 initiator_number：纠正 ${before[0]?.n ?? 0} 个位点（原浏览页提取值有错位）`);
+  }
 
   // ---- 汇总 --------------------------------------------------------------
   log('\n=== 装载结果 ===');

@@ -22,13 +22,13 @@ const speciesList = ref([])
 const paletteOpen = ref(false)
 const showBacktop = ref(false)
 
-/** 主菜单 —— 与原站菜单一一对应（顺序同原站：首页/浏览/统计图鉴/检索/序列比对/下载/帮助） */
+/** 主菜单 —— 与原站菜单一一对应（atlas 是新站新增的统计图鉴） */
 const navItems = [
     { name: 'home', key: 'nav.home', to: '/' },
     { name: 'browse', key: 'nav.browse', to: '/browse' },
-    { name: 'stats', key: 'nav.stats', to: '/stats' },
     { name: 'search', key: 'nav.search', to: '/search' },
     { name: 'blast', key: 'nav.blast', to: '/blast' },
+    { name: 'atlas', key: 'nav.stats', to: '/atlas' },
     { name: 'download', key: 'nav.download', to: '/download' },
     { name: 'help', key: 'nav.help', to: '/help' },
 ]

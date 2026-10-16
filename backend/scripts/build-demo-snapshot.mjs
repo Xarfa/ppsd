@@ -5,14 +5,7 @@
  * 这个只从 data/ 下已采集的公开数据文件里节选一小批位点，产出几百 KB 的 JSON，
  * 供 GitHub Pages 上的公开演示使用 —— 不把整库数据带进公开仓库。
  *
- * 用法：
- *   node backend/scripts/build-demo-snapshot.mjs
- *   PPSD_DATA_DIR=/path/to/data node backend/scripts/build-demo-snapshot.mjs
- *
- * 数据源默认取本仓库的 data/（公开仓库里只有 samples/，跑不起来）；
- * 本地有完整 data/ 目录时用 PPSD_DATA_DIR 指过去，例如：
- *   PPSD_DATA_DIR=../PPSD/data node backend/scripts/build-demo-snapshot.mjs
- *
+ * 用法：node backend/scripts/build-demo-snapshot.mjs
  * 输出：src/demo/demo-data.json
  *       src/demo/demo-data.b64.txt（gzip + base64，构建时内嵌进单文件 HTML）
  *
@@ -27,10 +20,7 @@ import zlib from 'node:zlib';
 import readline from 'node:readline';
 
 const ROOT = path.resolve(import.meta.dirname, '..', '..');
-const DATA_ROOT = process.env.PPSD_DATA_DIR
-    ? path.resolve(process.env.PPSD_DATA_DIR)
-    : path.join(ROOT, 'data');
-const DATA = (p) => path.join(DATA_ROOT, p);
+const DATA = (p) => path.join(ROOT, 'data', p);
 const OUT_JSON = path.join(ROOT, 'src', 'demo', 'demo-data.json');
 const OUT_B64 = path.join(ROOT, 'src', 'demo', 'demo-data.b64.txt');
 
@@ -185,31 +175,80 @@ for (const l of loci) {
 const sequences = {};
 for (const l of loci) if (seqAll[l.phas_loci]) sequences[l.phas_loci] = seqAll[l.phas_loci];
 
-// initiator：原库只有水稻和大豆发布了这个文件
+// initiator：官方文件只有水稻和大豆；其余 6 物种用 scraped/initiator_scraped.tsv
+// （2026-10-16 从老站公开页面抓取，已与官方文件交叉验证一致）。
+// 注意：官方导出按降解组库重复记录（同一 miRNA 多行），老站页面是 DISTINCT 语义，
+// 所以这里按 11 个正文字段去重，保证 demo 与原站展示一致。
 const initiators = [];
 let iniId = 0;
-for (const [abbr, file] of [['osa', 'osa_database_initiator.txt'], ['gma', 'gma_database_initiator.txt']]) {
+const iniSeen = new Set();
+const pushInitiator = (r, abbr) => {
+    const phasGene = r.phas_gene ?? r.PHAS_Gene;
+    const mirna = r.mirna ?? r.miRNA;
+    const geneid = r.geneid ?? r.GeneID;
+    const cleavege = r.cleavege_site ?? r.Cleavege_site;
+    const tpe = r.target_pos_end ?? r.Target_pos_end;
+    const posmax = r.posmax_min ?? r.Posmax_min;
+    const dist = r.distance ?? r.Distance;
+    const seq = r.initiator_seq ?? r.Initiator_seq;
+    const len = r.initiator_len ?? r.Initiator_len;
+    const marker = r.recordmarker ?? r.Recordmarker;
+    const verified = r.verified ?? r.Verified;
+    const key = [phasGene, mirna, geneid, cleavege, tpe, posmax, dist, seq, len, marker, verified].join('\u0001');
+    if (iniSeen.has(key)) return;
+    iniSeen.add(key);
+    if (!picked.has(phasGene)) return;
     const sp = SPECIES.find((s) => s.abbr === abbr);
-    for (const r of readTsv(DATA(`raw/${file}`))) {
-        if (!picked.has(r.PHAS_Gene)) continue;
-        initiators.push({
-            id: ++iniId,
-            species: abbr,
-            phas_gene: r.PHAS_Gene,
-            mirna: r.miRNA,
-            geneid: r.GeneID,
-            cleavege_site: num(r.Cleavege_site),
-            target_pos_end: num(r.Target_pos_end),
-            posmax_min: num(r.Posmax_min),
-            distance: num(r.Distance),
-            initiator_seq: r.Initiator_seq,
-            initiator_len: num(r.Initiator_len),
-            verified: r.Verified,
-            common_name: sp.common_name,
-            common_name_en: sp.common_name_en,
-            scientific_name: sp.scientific_name,
-        });
+    initiators.push({
+        id: ++iniId,
+        species: abbr,
+        phas_gene: phasGene,
+        mirna,
+        geneid,
+        cleavege_site: num(cleavege),
+        target_pos_end: num(tpe),
+        posmax_min: num(posmax),
+        distance: num(dist),
+        initiator_seq: seq,
+        initiator_len: num(len),
+        verified,
+        common_name: sp.common_name,
+        common_name_en: sp.common_name_en,
+        scientific_name: sp.scientific_name,
+    });
+};
+for (const [abbr, file] of [['osa', 'osa_database_initiator.txt'], ['gma', 'gma_database_initiator.txt']]) {
+    for (const r of readTsv(DATA(`raw/${file}`))) pushInitiator(r, abbr);
+}
+// 其余 6 物种：抓取数据（列名已是小写下划线）
+{
+    const fp = DATA('scraped/initiator_scraped.tsv');
+    if (fs.existsSync(fp)) {
+        let n = 0;
+        for (const r of readTsv(fp)) {
+            if (r.species === 'osa' || r.species === 'gma') continue; // 这两个物种用官方文件
+            pushInitiator(r, r.species);
+            n++;
+        }
+        console.log(`  initiator: +${n} 行抓取数据（6 物种，去重后入快照）`);
     }
+}
+
+// 用去重后的 initiator 记录重算演示位点的 initiator_number：
+// derived 里这个字段有列错位（2026-10-16 抽样 770 个位点发现 327 个少算），
+// 以真实记录数为准。
+{
+    const cnt = new Map();
+    for (const i of initiators) cnt.set(i.phas_gene, (cnt.get(i.phas_gene) || 0) + 1);
+    let fixed = 0;
+    for (const l of loci) {
+        const n = cnt.get(l.phas_loci);
+        if (n !== undefined && l.initiator_number !== n) {
+            l.initiator_number = n;
+            fixed++;
+        }
+    }
+    console.log(`  initiator_number: 重算 ${fixed} 个演示位点（原 derived 值有错位）`);
 }
 
 // 靶基因：全量流式扫一遍官方导出，只要两类信息

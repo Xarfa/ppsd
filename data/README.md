@@ -1,10 +1,5 @@
 # PPSD 数据资产说明
 
-> ⚠️ **本仓库只包含 `samples/`（各数据文件的真实片段）和 `schema.sql`（建表脚本）。**
-> 下文描述的 `raw/` `browse/` `derived/` `reference/` 等完整数据目录**不在本仓库内**
-> （体积大且数据归属实验室，不进公开仓库）—— 留档仅供了解原始数据的全貌，
-> 需要完整数据请从官网 <http://cbi.njau.edu.cn/PPSD> 公开接口重新采集。
-
 本目录存放 PPSD（Plant Phased siRNA Database，植物 phased siRNA 数据库）的**真实数据**。
 
 ## 数据来源与获取方式
@@ -29,6 +24,9 @@ data/
 ├── raw/          官网 download.php 发布的原始文件（水稻 + 大豆，小写表头原名）
 ├── browse/       从浏览页 JS 提取的 8 个物种全量数据（JSON，原样保存）
 ├── derived/      把 browse/ 合并整理成可直接 COPY 进数据库的 TSV / FASTA
+├── scraped/      从老站 single_cluster.php 抓取的 6 物种 initiator（2026-10-16，见下）
+├── samples/      给用户看的 9 个数据样例 + 导览
+├── reference/    老站整站参考副本（源码/资产，7.8G×2，.gitignore 内）
 └── schema.sql    PostgreSQL 建表脚本（依据真实表头 + 论文第三章写成）
 ```
 
@@ -46,7 +44,43 @@ data/
 | `gma_new_PHAS_Gene.fa` | — | 1.4 MB | 大豆，同上 |
 
 **官网只发布了水稻（osa）和大豆（gma）两个物种的下载包**，其余 6 个物种没有官方
-导出文件 —— 这是原站的数据缺口，不是采集遗漏。
+导出文件 —— 这是原站的数据缺口，不是采集遗漏。这 6 个物种的 initiator 由
+`scraped/` 补齐（见下）。
+
+### `scraped/` —— 6 物种 initiator 抓取数据（2026-10-16 新增）
+
+老站 PostgreSQL 里 8 个物种都有 `{spe}_initiator_21` 表，但官网只发布水稻/大豆的
+导出包。`single_cluster.php` 会把每个位点的 initiator 完整记录渲染成公开 HTML 表格，
+于是有了这个目录：
+
+| 文件 | 说明 |
+|---|---|
+| `scrape_loci.py` | 抓取脚本（礼貌速率 0.6s/请求，断点续传，自动重试） |
+| `convert.py` | 把 JSONL 转成灌库 TSV + 与官方文件交叉验证 |
+| `<species>.jsonl` | 每位点一行的原始抓取记录（initiator + phasiRNA 列表） |
+| `initiator_scraped.tsv` | **灌库用**：6 物种 initiator，列与官方文件对齐 |
+| `phasi_rna_scraped.tsv` | 每位点 phasiRNA 的靶基因验证状态（供核对） |
+| `validation_report.txt` | 与官方导出文件的交叉验证结果 |
+| `conversion_report.txt` | 抓取汇总统计 |
+
+复现/续传：
+
+```bash
+cd data/scraped
+python scrape_loci.py --species zea_mays        # 抓某个物种（中断后重跑同命令即可续传）
+python scrape_loci.py --species all             # 全部 8 物种
+python convert.py                               # 转换 + 交叉验证
+```
+
+**数据可信度**：抓取的水稻/大豆样本与官方导出文件逐位点比对完全一致
+（33/33 + 30/30，注意官方文件按降解组库重复记录，老站页面是 DISTINCT 语义）。
+抓取过程还发现并修正了一个 2026-09-25 遗留的数据错误：浏览页提取的
+`initiator_number` 有列错位（抽样 770 个位点里 327 个少算），`db:load` 现在会用
+真实 initiator 记录回填纠正这个字段。
+
+**仍然没有的**：6 物种每条 phasiRNA 的**靶基因明细**（老站只在 single_phasiRNA.php
+逐页展示，10 万+ 页面不适用抓取；initiator 记录和位点级 target_verified 已补齐）。
+要完整靶基因明细，找管理员 `pg_dump` 老站数据库是更彻底的路子。
 
 ### `browse/` —— 8 物种全量（JSON）
 
