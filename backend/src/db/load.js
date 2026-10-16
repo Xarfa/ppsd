@@ -349,6 +349,12 @@ async function main() {
   // 327 个与官方文件不符：有的少算、有的混成了官方文件原始行数）。
   // initiator 记录现已覆盖 8 个物种，以实际记录数为准纠正这个字段
   // （与老站 single_cluster 页面 "total initiators count" 同语义）。
+  //
+  // pglite 驱动灌完几十万行之后，同一个进程里继续 SELECT 会读不到数据行
+  // （WASM 后端丢了 dataRow 消息；INSERT 不受影响，落库数据始终正确，
+  // 换个新进程读也正常）。这里重连一次恢复读取，pg 驱动无此问题、
+  // closeDb() 后同样会自动重连，两种驱动行为一致。
+  await closeDb();
   {
     const { rows: before } = await query(`
       SELECT count(*)::int AS n FROM clusters c
