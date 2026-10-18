@@ -184,6 +184,9 @@ const messages = {
         'sirna.title': 'Degradome-verified Targets',
         'sirna.noTargets': 'This phasiRNA has no degradome-verified target records.',
         'sirna.noTargetsHint': 'Only rice and soybean have target data.',
+        'sirna.notImported': 'Target-gene details for this species have not been imported yet.',
+        'sirna.notImportedHint':
+            'Currently only rice and soybean have target-gene records. A pg_dump of the legacy database is needed to fill the other six species.',
 
         'search.title': 'Search',
         'search.sub': 'Find any component of a phasiRNA regulatory pathway.',
@@ -316,6 +319,7 @@ const messages = {
         'pager.nextPage': 'Next',
         'common.yes': 'yes',
         'common.no': 'no',
+        'common.notAvailable': 'N/A',
         'common.empty': '—',
 
         /* ---------- v2 新增 ---------- */
@@ -532,6 +536,8 @@ const messages = {
         'sirna.title': '降解组验证的靶基因',
         'sirna.noTargets': '该 phasiRNA 没有降解组验证的靶基因记录。',
         'sirna.noTargetsHint': '当前只有水稻和大豆有靶基因数据。',
+        'sirna.notImported': '该物种的靶基因明细尚未导入。',
+        'sirna.notImportedHint': '目前只有水稻和大豆有靶基因记录；其余 6 个物种需要老库 pg_dump 才能补齐。',
 
         'search.title': '检索',
         'search.sub': '定位 phasiRNA 调控通路中的任意一个组分。',
@@ -658,6 +664,7 @@ const messages = {
         'pager.nextPage': '下一页',
         'common.yes': '是',
         'common.no': '否',
+        'common.notAvailable': '未导入',
         'common.empty': '—',
 
         /* ---------- v2 新增 ---------- */

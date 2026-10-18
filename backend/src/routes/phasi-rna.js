@@ -9,6 +9,13 @@ import { tplotUrl } from '../tplot.js';
 
 export const phasiRnaRouter = Router();
 
+/**
+ * 目前只有水稻和大豆导入了靶基因明细。
+ * 其余 6 个物种不是"没有靶基因"，而是老库的靶基因表还没拿到；
+ * 页面必须把这两种情况区分开，否则会误导。
+ */
+const TARGET_SPECIES = new Set(['osa', 'gma']);
+
 /** GET /api/phasi-rna/:id —— 单条 phasiRNA 的基本信息 + 全部降解组验证靶基因 */
 phasiRnaRouter.get('/phasi-rna/:id', async (req, res, next) => {
   try {
@@ -49,6 +56,7 @@ phasiRnaRouter.get('/phasi-rna/:id', async (req, res, next) => {
       ...rows[0],
       targets: targetsWithPlot,
       target_count: targetsWithPlot.length,
+      target_data_available: TARGET_SPECIES.has(rows[0].species),
     });
   } catch (e) {
     next(e);

@@ -41,6 +41,9 @@ const basicRows = computed(() => {
     ]
 })
 
+/** 后端告诉前端：这个物种的靶基因表到底导没导（不是"有没有靶基因"） */
+const targetDataAvailable = computed(() => data.value?.target_data_available !== false)
+
 const catLabel = (c) => (c === 'Cat_1' ? t('stats.cat.1') : c === 'Cat_2' ? t('stats.cat.2') : t('stats.cat.unknown'))
 const catColor = (c) => (c === 'Cat_1' ? cssVar('--c-accent', '#127a50') : c === 'Cat_2' ? cssVar('--c-sp-zma', '#e3a63b') : cssVar('--c-chart-2', '#9aa9a0'))
 
@@ -171,8 +174,18 @@ watch(() => route.params.id, fetchData)
                             <h1 class="sirna-hero__id mono display">{{ data.phasi_rna }}</h1>
                             <div class="rowline rowline--wrap" style="gap: var(--sp-2); margin-top: 6px">
                                 <span class="badge badge--soft">{{ data.scientific_name }}</span>
-                                <span class="badge" :class="data.target_count > 0 ? 'badge--yes' : 'badge--no'">
-                                    {{ t('f.degVerified') }}: {{ data.target_count > 0 ? t('common.yes') : t('common.no') }}
+                                <span
+                                    class="badge"
+                                    :class="!targetDataAvailable ? 'badge--warn' : data.target_count > 0 ? 'badge--yes' : 'badge--no'"
+                                >
+                                    {{ t('f.degVerified') }}:
+                                    {{
+                                        !targetDataAvailable
+                                            ? t('common.notAvailable')
+                                            : data.target_count > 0
+                                              ? t('common.yes')
+                                              : t('common.no')
+                                    }}
                                 </span>
                                 <span class="badge badge--accent mono">{{ data.length }} nt</span>
                             </div>
@@ -222,8 +235,14 @@ watch(() => route.params.id, fetchData)
                         </div>
 
                         <div v-if="!data.targets.length" class="state">
-                            {{ data.demoTrimmed ? t('sirna.demoTrimmed') : t('sirna.noTargets') }}
-                            <div class="state__hint dim">{{ data.demoTrimmed ? t('demo.note') : t('sirna.noTargetsHint') }}</div>
+                            <template v-if="!targetDataAvailable && !data.demoTrimmed">
+                                {{ t('sirna.notImported') }}
+                                <div class="state__hint dim">{{ t('sirna.notImportedHint') }}</div>
+                            </template>
+                            <template v-else>
+                                {{ data.demoTrimmed ? t('sirna.demoTrimmed') : t('sirna.noTargets') }}
+                                <div class="state__hint dim">{{ data.demoTrimmed ? t('demo.note') : t('sirna.noTargetsHint') }}</div>
+                            </template>
                         </div>
 
                         <div v-else class="table-wrap" style="max-height: 460px">
