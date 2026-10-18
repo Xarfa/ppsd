@@ -34,11 +34,12 @@ const engineMeta = computed(() => engines.value.find((e) => e.id === engine.valu
 const ncbiMeta = computed(() => engines.value.find((e) => e.id === 'ncbi') || null)
 const isNcbi = computed(() => engine.value === 'ncbi')
 
-/** 下拉框里显示 "NCBI BLAST+ · v2.9.0+" 或 "不可用" */
+/** 下拉框里显示 "NCBI BLAST+ · v2.9.0+" 或 "JS approximate" / "JS 近似" */
 function engineLabel(e) {
-    const version = e.version ? ` · v${e.version}` : ''
+    const name = e.id === 'ncbi' ? t('blast.engine.ncbi') : t('blast.engine.js')
+    const version = e.id === 'ncbi' && e.version ? ` · v${e.version}` : ''
     const unavailable = e.available ? '' : ` — ${t('blast.engine.unavailable')}`
-    return `${e.label}${version}${unavailable}`
+    return `${name}${version}${unavailable}`
 }
 
 /* 示例序列：水稻一个真实 phasiRNA，点一下就能出结果，适合演示 */

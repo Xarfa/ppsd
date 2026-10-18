@@ -682,6 +682,24 @@ th.num-cell, td.num-cell { text-align: right; font-variant-numeric: tabular-nums
     border-left-color: var(--c-warn);
     background: var(--c-warn-bg);
 }
+.note__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    margin-right: 8px;
+    border-radius: 50%;
+    background: var(--c-accent);
+    color: #fff;
+    font-size: 10px;
+    font-weight: 700;
+    line-height: 1;
+    vertical-align: 1px;
+}
+.note--warn .note__icon {
+    background: var(--c-warn);
+}
 
 /* ---------- 键值表（详情页） ---------- */
 .kv {

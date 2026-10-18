@@ -214,8 +214,8 @@ watch(() => route.params.id, fetchData)
                         </div>
                     </section>
 
-                    <!-- 靶基因表 -->
-                    <section class="card" style="grid-column: span 8">
+                    <!-- 靶基因表：占满整行，否则列多时 T-plot 会被挤到横向滚动条外 -->
+                    <section class="card" style="grid-column: span 12">
                         <div class="card__head">
                             <span class="card__title">{{ t('sirna.title') }}</span>
                             <span class="card__hint mono">{{ fmt(data.target_count) }}</span>
@@ -278,7 +278,7 @@ watch(() => route.params.id, fetchData)
                     </section>
 
                     <!-- 文库分布 -->
-                    <section v-if="data.targets.length" class="card" style="grid-column: span 4">
+                    <section v-if="data.targets.length" class="card" style="grid-column: span 12">
                         <div class="card__head"><span class="card__title">{{ t('col.degLib') }}</span></div>
                         <div class="card__body">
                             <div class="chart-box" style="height: 280px"><div ref="libEl" class="chart"></div></div>

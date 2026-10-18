@@ -86,8 +86,8 @@ export async function detectNcbi() {
             available: false,
             ...base,
             reason:
-                'NCBI BLAST+ 是 Linux 二进制，当前系统不是 Linux；' +
-                '本机开发请用 JS 引擎，服务器上会自动启用。',
+                'NCBI BLAST+ is a Linux binary; current platform is not Linux. ' +
+                'Use the JS engine for local development; the server enables NCBI automatically.',
         };
         return cached;
     }
