@@ -89,13 +89,21 @@ const medianGap = computed(() => {
 /* ---------- 老站位点结构图（plot/{物种}/{span}/{recorder}.jpg）----------
    老站 single_cluster.php 里唯一在线运行的图表，按 recorder 编号直接取图。
    图片属于静态资产，部署时把老站 plot/ 目录放到站点根下即可生效；
+   路径必须带构建 base（/PPSD_new/），否则在 /locus/:id 下会解析成
+   /PPSD_new/locus/plot/... 而 404。
    本地开发/演示版没有这个目录，img onerror 后显示提示。 */
 const legacyPlot = computed(() => {
     const l = locus.value
     if (!l?.recorder || !l.scientific_name) return null
     const span = (l.phas_loci.match(/@(\d+)#/) || [])[1] || '21'
     const dir = l.scientific_name.toLowerCase().replace(/\s+/g, '_')
-    return { url: `plot/${dir}/${span}/${l.recorder}.jpg`, species: dir, span, recorder: l.recorder }
+    const base = import.meta.env.BASE_URL || '/'
+    return {
+        url: `${base}plot/${dir}/${span}/${l.recorder}.jpg`,
+        species: dir,
+        span,
+        recorder: l.recorder,
+    }
 })
 const legacyPlotFailed = ref(false)
 
