@@ -41,6 +41,22 @@ export const config = {
   /** 驱动 = pg 时使用的连接串 */
   databaseUrl:
     process.env.DATABASE_URL || 'postgres://postgres@127.0.0.1:5432/ppsd',
+
+  /**
+   * BLAST 引擎配置。
+   *
+   * dir/bin/dbDir 留空时由 blast/ncbi.js 按平台自动探测：
+   *   服务器：/home/www/html/PPSD_zby/blast
+   *   本地：  data/reference/PPSD_zby/blast
+   * engine：auto（有 NCBI 就用 NCBI，否则 JS）/ ncbi / js
+   */
+  blast: {
+    dir: process.env.PPSD_BLAST_DIR || '',
+    bin: process.env.PPSD_BLAST_BIN || '',
+    dbDir: process.env.PPSD_BLAST_DB_DIR || '',
+    engine: (process.env.PPSD_BLAST_ENGINE || 'auto').toLowerCase(),
+    timeoutMs: Number(process.env.PPSD_BLAST_TIMEOUT_MS || 30000),
+  },
 };
 
 /**
