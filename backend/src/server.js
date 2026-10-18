@@ -30,6 +30,7 @@ import { downloadsRouter } from './routes/downloads.js';
 import { blastRouter } from './routes/blast.js';
 import { treeRouter } from './routes/tree.js';
 import { atlasRouter } from './routes/atlas.js';
+import { assetsRouter } from './routes/assets.js';
 import { getTplotDir } from './tplot.js';
 import { getJbrowseDir } from './jbrowse.js';
 
@@ -104,6 +105,7 @@ for (const prefix of API_PREFIXES) {
   app.use(prefix, downloadsRouter);
   app.use(prefix, blastRouter);
   app.use(prefix, treeRouter);
+  app.use(prefix, assetsRouter);
 }
 
 // 统一的错误处理：把 SQL 报错原样返回，方便调试（上线前应该收敛）
