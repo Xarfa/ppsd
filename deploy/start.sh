@@ -14,6 +14,7 @@
 #                 不需要服务器上任何数据库账号
 #   PGLITE_DIR    数据库文件的落地目录（备份数据库 = 备份这个目录）
 #   PORT          监听端口。3615/3616/3617 已被其他站占用，所以用 3618
+#   PPSD_*_DIR    老站资产目录（BLAST / tplot / JBrowse），只读引用，不拷进项目
 # ===========================================================================
 set -euo pipefail
 
@@ -39,6 +40,14 @@ export PATH="$NODE_HOME/bin:$PATH"
 export PPSD_DB_DRIVER=pglite
 export PGLITE_DIR="$PPSD_HOME/pgdata"
 export PORT=3618
+
+# 老站静态资产只读引用（省 3.3G JBrowse / 2.5G tplot / 749M BLAST）
+# 不在服务器上时不要设，留给后端自动探测本地 data/reference
+if [ -d /home/www/html/PPSD_zby ]; then
+    export PPSD_BLAST_DIR="${PPSD_BLAST_DIR:-/home/www/html/PPSD_zby/blast}"
+    export PPSD_TPOT_DIR="${PPSD_TPOT_DIR:-/home/www/html/PPSD_zby/tplot}"
+    export PPSD_JBROWSE_DIR="${PPSD_JBROWSE_DIR:-/home/www/html/PPSD_zby/JBrowse/jbrowse}"
+fi
 
 cd "$PPSD_HOME/backend"
 exec node src/server.js

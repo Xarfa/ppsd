@@ -5,7 +5,7 @@
 #     powershell -ExecutionPolicy Bypass -File deploy\pack-local.ps1
 #
 # 产出三个上传包（放在 %TEMP% 下）：
-#     ppsd-backend.tar.gz   后端 + node_modules + start.sh（约 9 MB）
+#     ppsd-backend.tar.gz   后端 + node_modules + 运维脚本（约 9 MB）
 #     ppsd-data.tar.gz      灌库用的数据（约 14 MB）
 #     ppsd-dist.tar.gz      前端构建产物（约 2.7 MB）
 #
@@ -25,10 +25,10 @@ Push-Location $root
 npm run build:server
 Pop-Location
 
-Write-Host "[2/4] 打包后端（含启动脚本；排除本机 .env）"
-# 两个 -C：先在项目根打包 backend 目录，再切到 deploy/ 把 start.sh 打到包内根目录，
-# 解压后正好是 ~/ppsd-26/app/backend/ + ~/ppsd-26/app/start.sh 这个布局
-tar czf "$tmp\ppsd-backend.tar.gz" --exclude="backend/.env" --exclude="__pycache__" -C $root backend -C "$root\deploy" start.sh
+Write-Host "[2/4] 打包后端（含运维脚本；排除本机 .env）"
+# 两个 -C：先在项目根打包 backend 目录，再切到 deploy/ 把运维脚本打到包内根目录，
+# 解压后正好是 ~/ppsd-26/app/backend/ + ~/ppsd-26/app/*.sh 这个布局
+tar czf "$tmp\ppsd-backend.tar.gz" --exclude="backend/.env" --exclude="__pycache__" -C $root backend -C "$root\deploy" start.sh stop.sh restart.sh autostart.sh check-assets.sh
 
 Write-Host "[3/4] 打包数据（raw + derived + 抓取的 initiator + samples）"
 # -C 切到 data 目录再指定要打的内容，包内路径就是 raw/... derived/... 这样
@@ -44,6 +44,6 @@ Write-Host "完成，三个包在这里："
 Get-ChildItem "$tmp\ppsd-*.tar.gz" | Select-Object Name, @{n = 'MB'; e = { [math]::Round($_.Length / 1MB, 2) } }
 Write-Host ""
 Write-Host "下一步（在 PowerShell 里逐条执行）："
-Write-Host "  scp `"$tmp\ppsd-backend.tar.gz`" lab-hj:/home/riceUsers/wjj/"
-Write-Host "  scp `"$tmp\ppsd-data.tar.gz`"    lab-hj:/home/riceUsers/wjj/"
-Write-Host "  scp `"$tmp\ppsd-dist.tar.gz`"    lab-hj:/home/riceUsers/wjj/"
+Write-Host "  scp `"$tmp\ppsd-backend.tar.gz`" lab-hj:/home/riceUsers/wjj/ppsd-26/"
+Write-Host "  scp `"$tmp\ppsd-data.tar.gz`"    lab-hj:/home/riceUsers/wjj/ppsd-26/"
+Write-Host "  scp `"$tmp\ppsd-dist.tar.gz`"    lab-hj:/home/riceUsers/wjj/ppsd-26/"
