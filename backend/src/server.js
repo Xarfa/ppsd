@@ -36,13 +36,24 @@ app.use(cors());
 app.use(express.json());
 
 /* 静态托管前端构建产物（dist/ 存在时）—— 分享包/服务器部署都是单进程：
-   node src/server.js 同时提供 API 和页面。 */
+   node src/server.js 同时提供 API 和页面。
+
+   前端是按 base=/PPSD_new/ 构建的（服务器子路径部署），页面里的资源引用
+   都带这个前缀。这里把 dist 挂两遍，两套访问方式共用一份产物：
+     · /PPSD_new/...  直连端口时用（内网直接访问 :3618、ssh 隧道转发到本地）
+     · /...           Apache 反代时用 —— ProxyPass 会把 /PPSD_new 前缀剥掉再转过来 */
 const distDir = path.resolve(paths.backendDir, '..', 'dist');
 if (fs.existsSync(distDir)) {
+  app.use('/PPSD_new', express.static(distDir));
   app.use(express.static(distDir));
 }
 
-app.get('/api/health', async (_req, res, next) => {
+/* API 路由挂两组前缀，配合上面静态托管的两种路径，同一份代码两种部署都能跑：
+     · /api/...            Apache 反代部署（ProxyPass 已把 /PPSD_new 剥掉）
+     · /PPSD_new/api/...   直连端口部署（前端 base=/PPSD_new/，请求自带前缀） */
+const API_PREFIXES = ['/api', '/PPSD_new/api'];
+
+async function healthHandler(_req, res, next) {
   try {
     const version = await getServerVersion();
     const { rows } = await query('SELECT count(*)::int AS n FROM clusters');
@@ -55,16 +66,19 @@ app.get('/api/health', async (_req, res, next) => {
   } catch (e) {
     next(e);
   }
-});
+}
 
-app.use('/api', speciesRouter);
-app.use('/api', atlasRouter);
-app.use('/api', lociRouter);
-app.use('/api', phasiRnaRouter);
-app.use('/api', searchRouter);
-app.use('/api', downloadsRouter);
-app.use('/api', blastRouter);
-app.use('/api', treeRouter);
+for (const prefix of API_PREFIXES) {
+  app.get(`${prefix}/health`, healthHandler);
+  app.use(prefix, speciesRouter);
+  app.use(prefix, atlasRouter);
+  app.use(prefix, lociRouter);
+  app.use(prefix, phasiRnaRouter);
+  app.use(prefix, searchRouter);
+  app.use(prefix, downloadsRouter);
+  app.use(prefix, blastRouter);
+  app.use(prefix, treeRouter);
+}
 
 // 统一的错误处理：把 SQL 报错原样返回，方便调试（上线前应该收敛）
 app.use((err, _req, res, _next) => {
@@ -72,8 +86,8 @@ app.use((err, _req, res, _next) => {
   res.status(500).json({ error: 'internal_error', message: err.message });
 });
 
-// SPA 兜底：非 /api 的路径全部回 index.html（vue-router history 模式）
-app.get(/^\/(?!api).*/, (_req, res) => {
+// SPA 兜底：非 API 的路径全部回 index.html（vue-router history 模式）
+app.get(/^\/(?!api|PPSD_new\/api).*/, (_req, res) => {
   const index = path.join(distDir, 'index.html');
   if (fs.existsSync(index)) res.sendFile(index);
   else res.status(404).send('dist/ not built — run `npm run build` first');
