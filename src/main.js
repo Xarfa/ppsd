@@ -46,11 +46,15 @@ import { setLocale, locale } from './i18n/index.js'
      /atlas                （新站新增）            统计图鉴
      /download             download.php           批量下载
      /help                 help.php               帮助 */
-/* 单文件演示版走 file:// 协议，history 模式不可用，改用 hash 路由 */
+/* 单文件演示版走 file:// 协议，history 模式不可用，改用 hash 路由。
+   普通构建必须把 BASE_URL 传给 vue-router：服务器部署在 /PPSD_new/ 子路径下，
+   不传 base 时 router 会把 /PPSD_new/... 当成未知路由，catch-all 重定向到 /，
+   在 Apache 上就跳出到老站根目录了。 */
 const isDemo = import.meta.env.VITE_STATIC_DEMO === '1'
+const routerBase = import.meta.env.BASE_URL || '/'
 
 const router = createRouter({
-    history: isDemo ? createWebHashHistory() : createWebHistory(),
+    history: isDemo ? createWebHashHistory() : createWebHistory(routerBase),
     routes: [
         { path: '/', name: 'home', component: HomeView },
         { path: '/browse/:species?', name: 'browse', component: BrowseView },
