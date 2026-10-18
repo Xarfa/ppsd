@@ -141,6 +141,20 @@ curl -s http://202.195.250.119/PPSD_new/api/health; echo
 
 返回和 `localhost:3618` 一样的 JSON = 生效了。
 
+### 新增功能自检（BLAST / tplot / JBrowse）
+
+```bash
+bash ~/ppsd-26/app/check-assets.sh
+```
+
+重点看三行：
+
+- `blast.available: true` 和 `version: 2.9.0+` → NCBI BLAST 可用
+- `tplot.missingSpecies` → 只应剩葡萄/玉米（没补图的话）
+- `jbrowse.available: true` → JBrowse 静态实例已挂上
+
+最后会跑一次真实 NCBI BLAST；返回 `"engine":"ncbi"` 才算成功，返回 `js` 说明 NCBI 没起来。
+
 ### 办法 B：还没配，但想现在给他看
 
 三种选择：

@@ -7,6 +7,10 @@
 > 要演示先运行 `bash ~/ppsd-26/app/restart.sh`。
 > 三个部署包已按你的要求清理掉。所以这份手册现在是你将来"换机器 / 重装"时的参考 ——
 > 到那时先用 `deploy/pack-local.ps1` 重新打包，再按下面的步骤上传解压。
+>
+> **2026-10-18 新增**：BLAST 双引擎（NCBI BLAST+ 2.9.0+ / JS）、tplot 降解组图、水稻 chr11 JBrowse 链接。
+> 三块都复用服务器老目录 `/home/www/html/PPSD_zby/` 下的资产，不拷进项目；
+> 部署后用 `bash ~/ppsd-26/app/check-assets.sh` 一次自检（数据库、BLAST、tplot、JBrowse、页面状态）。
 
 > **起点**：服务器上已经准备好两样东西，剩下的都由你自己敲 ——
 > - `~/env/node22/` —— Node 运行环境（老系统兼容版，已装好验证过，你**不用碰**它）
@@ -96,7 +100,7 @@ tar xzf ~/ppsd-26/ppsd-dist.tar.gz -C $PPSD
 ls $PPSD
 ```
 
-应该看到：`backend  data  dist  restart.sh  start.sh  stop.sh`
+应该看到：`backend  data  dist  autostart.sh  check-assets.sh  restart.sh  start.sh  stop.sh`
 
 ---
 
@@ -224,7 +228,24 @@ curl -s http://localhost:3618/PPSD_new/ | head -c 300; echo
 
 应该返回 HTML（含 `<title>PPSD — Plant Phased siRNA Database</title>`）。
 
-**这三条都过 = 服务器这边的部署完全成功。** 剩下的只是"怎么让浏览器访问到"。
+### 第四条：新增功能自检（BLAST / tplot / JBrowse）
+
+```bash
+bash $PPSD/check-assets.sh
+```
+
+它会一次检查：
+
+- `/api/health`：数据库 `clusters: 7760`
+- `/api/assets`：`blast.available`、`tplot.missingSpecies`、`jbrowse.available`
+- `/PPSD_new/` 和 `/PPSD_new/jbrowse/` 的 HTTP 状态
+- 一次真实 NCBI BLAST：返回 `"engine":"ncbi"` 才算成功；返回 `js` 说明 NCBI 没起来
+
+> 三块资产默认直接读 `/home/www/html/PPSD_zby/`：
+> `blast/`（NCBI BLAST+）、`tplot/`（表达图）、`JBrowse/jbrowse/`（水稻 chr11）。
+> 不拷进项目，所以部署包还是约 26 MB。缺的物种/图不会报错，前端会自动不显示按钮。
+
+**这几条都过 = 服务器这边的部署完全成功。** 剩下的只是"怎么让浏览器访问到"。
 
 ---
 

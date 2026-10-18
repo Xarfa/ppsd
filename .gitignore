@@ -53,6 +53,7 @@ data/*
 !data/README.md
 !data/schema.sql
 .review/
+.zcode/
 
 # 演示版产物：单文件 HTML 里内嵌了整库快照（165 位点真实数据）
 dist-demo/
