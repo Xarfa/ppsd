@@ -17,16 +17,29 @@ import { paths } from '../config.js';
 
 export const treeRouter = Router();
 
-const TREE_FILE = path.join(paths.dataDir, 'reference', 'species-tree.json');
+/**
+ * 树数据放哪，两个位置依次找：
+ *   1. data/reference/species-tree.json —— 本地开发用的完整版
+ *   2. data/samples/01_物种系统发育树_species-tree.json —— 会打进部署包，
+ *      所以线上一定有（data/reference/ 里有 15G 老站资料，不进部署包）
+ */
+const TREE_CANDIDATES = [
+    path.join(paths.dataDir, 'reference', 'species-tree.json'),
+    path.join(paths.dataDir, 'samples', '01_物种系统发育树_species-tree.json'),
+];
 
 /** 读一次就缓存 —— 这个文件不会变，没必要每次请求都读盘 */
 let cache = null;
 
 function loadTree() {
     if (cache) return cache;
-    if (!fs.existsSync(TREE_FILE)) return null;
-    cache = JSON.parse(fs.readFileSync(TREE_FILE, 'utf-8'));
-    return cache;
+    for (const file of TREE_CANDIDATES) {
+        if (fs.existsSync(file)) {
+            cache = JSON.parse(fs.readFileSync(file, 'utf-8'));
+            return cache;
+        }
+    }
+    return null;
 }
 
 /**
@@ -42,7 +55,9 @@ treeRouter.get('/species-tree', async (_req, res, next) => {
         if (!tree) {
             return res.status(404).json({
                 error: 'not_found',
-                message: 'species-tree.json is missing from data/reference/',
+                message:
+                    'species-tree.json not found. Looked in: ' +
+                    TREE_CANDIDATES.map((f) => f.replace(paths.dataDir, 'data/')).join(' and '),
             });
         }
         res.json({ tree });
