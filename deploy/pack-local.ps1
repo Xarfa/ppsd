@@ -27,7 +27,7 @@ Pop-Location
 
 Write-Host "[2/4] 打包后端（含启动脚本；排除本机 .env）"
 # 两个 -C：先在项目根打包 backend 目录，再切到 deploy/ 把 start.sh 打到包内根目录，
-# 解压后正好是 ~/PPSD/backend/ + ~/PPSD/start.sh 这个布局
+# 解压后正好是 ~/ppsd-26/app/backend/ + ~/ppsd-26/app/start.sh 这个布局
 tar czf "$tmp\ppsd-backend.tar.gz" --exclude="backend/.env" --exclude="__pycache__" -C $root backend -C "$root\deploy" start.sh
 
 Write-Host "[3/4] 打包数据（raw + derived + 抓取的 initiator + samples）"

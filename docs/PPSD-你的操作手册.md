@@ -3,7 +3,8 @@
 > 📌 **这份讲的是"第一次装"**（解压 → 灌库 → 启动 → 验证）。
 > **装好之后日常怎么打开、怎么给别人看** → 看 [`PPSD-怎么打开实例.md`](PPSD-怎么打开实例.md)。
 >
-> ⚠️ **当前状态（2026-10-17）**：服务器上**已经装好并且正在运行**，
+> ⚠️ **当前状态（2026-10-18）**：服务器上**已经装好，但服务当前是停的**（10-17 收尾时关了）。
+> 要演示先运行 `bash ~/ppsd-26/app/restart.sh`。
 > 三个部署包已按你的要求清理掉。所以这份手册现在是你将来"换机器 / 重装"时的参考 ——
 > 到那时先用 `deploy/pack-local.ps1` 重新打包，再按下面的步骤上传解压。
 
@@ -107,7 +108,7 @@ ls $PPSD
 cd $PPSD/backend
 export PATH="$HOME/env/node22/bin:$PATH"
 export PPSD_DB_DRIVER=pglite
-export PGLITE_DIR="$HOME/PPSD/pgdata"
+export PGLITE_DIR="$PPSD/pgdata"
 ```
 
 | 行 | 意思 |
@@ -115,7 +116,7 @@ export PGLITE_DIR="$HOME/PPSD/pgdata"
 | `cd $PPSD/backend` | 进入后端目录（程序要从这里找代码） |
 | `export PATH="$HOME/env/node22/bin:$PATH"` | **最要紧的一行**。`PATH` 是"去哪里找命令"的清单，这个把家目录的 Node 22 排到最前面，让后面的 `node` 用的是 22 版而不是系统里的 14 版（14 版跑不了这个项目） |
 | `export PPSD_DB_DRIVER=pglite` | 告诉程序用 pglite 驱动。**pglite 是把 PostgreSQL 编译成 WebAssembly 的版本**，是个真数据库（PostgreSQL 18），只是不用安装、不用账号密码 —— 数据就是一个目录 |
-| `export PGLITE_DIR="$HOME/PPSD/pgdata"` | 数据库文件放哪。以后备份数据库 = 打包这个目录，没别的 |
+| `export PGLITE_DIR="$PPSD/pgdata"` | 数据库文件放哪。以后备份数据库 = 打包这个目录，没别的 |
 
 > **这正是"不需要管理员"的原因**：不用碰服务器上的 PostgreSQL（那需要数据库账号，你没有），
 > 数据库完全跑在你自己家目录里。

@@ -2,10 +2,10 @@
 # ===========================================================================
 # PPSD 后端启动脚本
 #
-# 手动启动（前台，看报错用）：  bash ~/PPSD/start.sh
+# 手动启动（前台，看报错用）：  bash ~/ppsd-26/app/start.sh
 # 后台启动（日常用这个）：
-#     nohup bash ~/PPSD/start.sh > ~/PPSD/backend.log 2>&1 &
-# 看日志：  tail -f ~/PPSD/backend.log
+#     nohup bash ~/ppsd-26/app/start.sh > ~/ppsd-26/app/backend.log 2>&1 &
+# 看日志：  tail -f ~/ppsd-26/app/backend.log
 # 停止：    pkill -f "[n]ode src/server.js"
 #
 # 环境变量逐个解释：

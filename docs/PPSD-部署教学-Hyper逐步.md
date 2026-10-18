@@ -27,13 +27,13 @@
         ▼
 ┌──────────────────────────────────────────────┐
 │ 你的 Node 程序（跑在你家目录，占 3618 端口）    │
-│  ├─ 页面：~/PPSD/dist/ 里的 HTML/JS/CSS        │
+│  ├─ 页面：~/ppsd-26/app/dist/ 里的 HTML/JS/CSS        │
 │  └─ 接口：/api/... 查数据库后返回 JSON          │
 └──────────────────────────────────────────────┘
         │
         ▼
 ┌──────────────────────────────────────────────┐
-│ 数据库：~/PPSD/pgdata/（pglite = WASM 版 PG）  │
+│ 数据库：~/ppsd-26/app/pgdata/（pglite = WASM 版 PG）  │
 │  7760 个 PHAS 位点 / 10 万条 phasiRNA ...      │
 └──────────────────────────────────────────────┘
 ```
@@ -59,12 +59,12 @@
 
 - ✅ 已完成：Node 装好、三个包上传解压、54 万行数据灌好（`clusters: 7760` 是证据）
 - ⏳ **还差一步**：把后端服务拉起来。`start.sh` 还没传到服务器，所以第 4 课的
-  `bash ~/PPSD/start.sh` 暂时会报"文件不存在"。
+  `bash ~/ppsd-26/app/start.sh` 暂时会报"文件不存在"。
 
 **先用这条等价命令启动**（内容与 start.sh 完全一样，直接敲进服务器即可）：
 
 ```bash
-cd ~/PPSD/backend && export PATH="$HOME/node22/bin:$PATH" PPSD_DB_DRIVER=pglite PGLITE_DIR="$HOME/PPSD/pgdata" PORT=3618 && nohup node src/server.js > ~/PPSD/backend.log 2>&1 & sleep 3; curl -s http://localhost:3618/api/health; echo
+cd ~/ppsd-26/app/backend && export PATH="$HOME/node22/bin:$PATH" PPSD_DB_DRIVER=pglite PGLITE_DIR="$HOME/ppsd-26/app/pgdata" PORT=3618 && nohup node src/server.js > ~/ppsd-26/app/backend.log 2>&1 & sleep 3; curl -s http://localhost:3618/api/health; echo
 ```
 
 看到 `"clusters":7760` = 服务起来了。
@@ -150,7 +150,7 @@ $
 ### 敲这条（在服务器里）
 
 ```bash
-ls ~/PPSD
+ls ~/ppsd-26/app
 ```
 
 ### 逐字解释
@@ -159,7 +159,7 @@ ls ~/PPSD
 |---|---|
 | `ls` | list，列目录内容 |
 | `~` | 你的家目录，即 `/home/riceUsers/wjj`。两者完全等价 |
-| `~/PPSD` | 项目根目录 |
+| `~/ppsd-26/app` | 项目根目录 |
 
 ### 应该看到
 
@@ -177,12 +177,12 @@ backend  data  dist  start.sh
 再敲这几条，多认识一点：
 
 ```bash
-ls ~/PPSD/backend
+ls ~/ppsd-26/app/backend
 ```
 → `src`（代码）、`node_modules`（依赖包）、`package.json`。
 
 ```bash
-du -sh ~/PPSD/pgdata
+du -sh ~/ppsd-26/app/pgdata
 ```
 → 数据库文件占多大。`du` = disk usage，`-s` 总计、`-h` 人类可读单位（M/G）。
 
@@ -201,7 +201,7 @@ ls ~/node22/bin
 ### 敲这条（在服务器里）
 
 ```bash
-bash ~/PPSD/start.sh
+bash ~/ppsd-26/app/start.sh
 ```
 
 ### 逐字解释
@@ -209,11 +209,11 @@ bash ~/PPSD/start.sh
 | 部分 | 意思 |
 |---|---|
 | `bash` | 用 bash 解释器执行脚本文件 |
-| `~/PPSD/start.sh` | 要执行的脚本 |
+| `~/ppsd-26/app/start.sh` | 要执行的脚本 |
 
 ### 那个脚本里写了什么（你要知道每一行）
 
-打开看：`cat ~/PPSD/start.sh`。核心 5 行：
+打开看：`cat ~/ppsd-26/app/start.sh`。核心 5 行：
 
 ```bash
 export PATH="$HOME/node22/bin:$PATH"
@@ -227,11 +227,11 @@ export PATH="$HOME/node22/bin:$PATH"
 export PPSD_DB_DRIVER=pglite
 ```
 > 告诉后端："数据库用 pglite 驱动"。
-> pglite 是**编译成 WebAssembly 的 PostgreSQL**，一个真数据库，只是不用安装、不用配账号密码 —— 数据就是 `~/PPSD/pgdata` 那一个目录。
+> pglite 是**编译成 WebAssembly 的 PostgreSQL**，一个真数据库，只是不用安装、不用配账号密码 —— 数据就是 `~/ppsd-26/app/pgdata` 那一个目录。
 > 这解释了为什么服务器上不需要数据库账号。
 
 ```bash
-export PGLITE_DIR="$HOME/PPSD/pgdata"
+export PGLITE_DIR="$HOME/ppsd-26/app/pgdata"
 ```
 > 数据库文件放哪儿。备份数据库 = 备份这个目录。
 
@@ -243,7 +243,7 @@ export PORT=3618
 > 为什么不是 3000：这台机器上的应用集中在 36xx（3615/3616/3617 已是 SmartRice2、RiceData、RiceSALTNet），我们排 **3618**。
 
 ```bash
-cd "$HOME/PPSD/backend"
+cd "$HOME/ppsd-26/app/backend"
 exec node src/server.js
 ```
 > 进入后端目录（程序要按相对路径找 `../data`、`../dist`），然后启动 `src/server.js`。
@@ -282,7 +282,7 @@ PPSD backend 已启动: http://localhost:3618
 ### 敲这条（在服务器里）
 
 ```bash
-nohup bash ~/PPSD/start.sh > ~/PPSD/backend.log 2>&1 &
+nohup bash ~/ppsd-26/app/start.sh > ~/ppsd-26/app/backend.log 2>&1 &
 ```
 
 ### 逐字解释
@@ -290,8 +290,8 @@ nohup bash ~/PPSD/start.sh > ~/PPSD/backend.log 2>&1 &
 | 部分 | 意思 |
 |---|---|
 | `nohup` | no hang up。默认你一断开 ssh，服务器会把你起的程序杀掉；加了它，程序"挂不断"，继续活 |
-| `bash ~/PPSD/start.sh` | 启动那个脚本 |
-| `> ~/PPSD/backend.log` | 把程序的**正常输出**写进日志文件 |
+| `bash ~/ppsd-26/app/start.sh` | 启动那个脚本 |
+| `> ~/ppsd-26/app/backend.log` | 把程序的**正常输出**写进日志文件 |
 | `2>&1` | 把**错误输出**也倒进同一个文件（`2`=错误流，`1`=正常流，`&1`=跟正常流走同一个地方）。不加这句，报错信息就直接丢了 |
 | `&` | 扔到后台，命令行立刻还给你 |
 
@@ -356,12 +356,12 @@ ps aux | grep "node src/server.js"
 ### ② 它在嘀咕什么？（看日志）
 
 ```bash
-tail -20 ~/PPSD/backend.log
+tail -20 ~/ppsd-26/app/backend.log
 ```
 → 看最后 20 行。`tail` = 看文件结尾（`head` 看开头）。
 
 ```bash
-tail -f ~/PPSD/backend.log
+tail -f ~/ppsd-26/app/backend.log
 ```
 → `-f` = follow，**实时滚动**，有人访问网站时这里会不断冒出新行。按 `Ctrl+C` 退出（只退出"看"，不停服务）。
 
@@ -373,7 +373,7 @@ pkill -f "node src/server.js"
 → 按名字杀进程。`pkill` = 按条件 kill，`-f` = 匹配完整命令行。
 
 ```bash
-nohup bash ~/PPSD/start.sh > ~/PPSD/backend.log 2>&1 &
+nohup bash ~/ppsd-26/app/start.sh > ~/ppsd-26/app/backend.log 2>&1 &
 curl -s http://localhost:3618/api/health; echo
 ```
 → 再起来，再验一次。**两步必须连着做**，不然你会以为它还在跑。
@@ -385,7 +385,7 @@ curl -s http://localhost:3618/api/health; echo
 ### 一键重启（记不住就抄这个）
 
 ```bash
-pkill -f "node src/server.js"; sleep 2; nohup bash ~/PPSD/start.sh > ~/PPSD/backend.log 2>&1 & sleep 3; curl -s http://localhost:3618/api/health; echo
+pkill -f "node src/server.js"; sleep 2; nohup bash ~/ppsd-26/app/start.sh > ~/ppsd-26/app/backend.log 2>&1 & sleep 3; curl -s http://localhost:3618/api/health; echo
 ```
 
 ---
@@ -524,9 +524,9 @@ scp dist-demo/index.html lab-hj:/home/www/html/RiceSALTnet/ppsd-demo.html
 |---|---|
 | 连服务器 | `ssh lab-hj` |
 | 看后端活着没 | `curl -s http://localhost:3618/api/health; echo` |
-| 后台启动 | `nohup bash ~/PPSD/start.sh > ~/PPSD/backend.log 2>&1 &` |
-| 一键重启 | `pkill -f "node src/server.js"; sleep 2; nohup bash ~/PPSD/start.sh > ~/PPSD/backend.log 2>&1 & sleep 3; curl -s http://localhost:3618/api/health; echo` |
-| 看实时日志 | `tail -f ~/PPSD/backend.log` |
+| 后台启动 | `nohup bash ~/ppsd-26/app/start.sh > ~/ppsd-26/app/backend.log 2>&1 &` |
+| 一键重启 | `pkill -f "node src/server.js"; sleep 2; nohup bash ~/ppsd-26/app/start.sh > ~/ppsd-26/app/backend.log 2>&1 & sleep 3; curl -s http://localhost:3618/api/health; echo` |
+| 看实时日志 | `tail -f ~/ppsd-26/app/backend.log` |
 | 看进程 | `ps aux \| grep "node src/server.js"` |
 | 停服务 | `pkill -f "node src/server.js"` |
 | 退出服务器 | `exit` |
@@ -552,10 +552,10 @@ scp dist-demo/index.html lab-hj:/home/www/html/RiceSALTnet/ppsd-demo.html
 |---|---|
 | 服务器系统 | Ubuntu 16.04.7，glibc 2.23，128 核 / 503G 内存 |
 | Node | `~/node22/bin/node` = v22.23.3（glibc-217 兼容构建） |
-| 后端 | `~/PPSD/backend`（Express 5 + pglite 驱动） |
-| 数据 | `~/PPSD/data`（raw 113M / derived 25M / scraped 0.5M） |
-| 数据库 | `~/PPSD/pgdata`，灌入 54 万行，53.5 秒 |
+| 后端 | `~/ppsd-26/app/backend`（Express 5 + pglite 驱动） |
+| 数据 | `~/ppsd-26/app/data`（raw 113M / derived 25M / scraped 0.5M） |
+| 数据库 | `~/ppsd-26/app/pgdata`，灌入 54 万行，53.5 秒 |
 | 灌库结果 | species 8 / clusters 7760 / phas_seq 7760 / phasi_rna 104166 / phasi_rna_target 465863 / initiator 8956 |
-| 前端产物 | `~/PPSD/dist`（base=/PPSD_new/，2.7 MB） |
+| 前端产物 | `~/ppsd-26/app/dist`（base=/PPSD_new/，2.7 MB） |
 | 端口 | 3618（3615/3616/3617 已被其他站占用） |
 | 待办 | ① 拉起服务（见开头"当前状态提醒"里的应急命令）② `start.sh` 传到服务器 ③ Apache 转发规则（管理员） |
