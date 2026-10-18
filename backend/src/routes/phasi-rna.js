@@ -5,6 +5,7 @@
  */
 import { Router } from 'express';
 import { query } from '../db/index.js';
+import { tplotUrl } from '../tplot.js';
 
 export const phasiRnaRouter = Router();
 
@@ -37,10 +38,17 @@ phasiRnaRouter.get('/phasi-rna/:id', async (req, res, next) => {
       [req.params.id],
     );
 
+    // 老站只有 Cat_1 的靶基因才显示 T-plot 图标；文件不存在时也不给 URL
+    const sp = rows[0].species;
+    const targetsWithPlot = targets.rows.map((r) => ({
+      ...r,
+      tplot: r.category === 'Cat_1' ? tplotUrl('phasiRNA', sp, r.t_plot) : null,
+    }));
+
     res.json({
       ...rows[0],
-      targets: targets.rows,
-      target_count: targets.rows.length,
+      targets: targetsWithPlot,
+      target_count: targetsWithPlot.length,
     });
   } catch (e) {
     next(e);

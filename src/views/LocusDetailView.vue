@@ -13,6 +13,7 @@ import { ref, computed, watch, onMounted, onBeforeUnmount, nextTick } from 'vue'
 import { useRoute, RouterLink } from 'vue-router'
 import api, { speciesName } from '../api/ppsd.js'
 import { t, locale } from '../i18n/index.js'
+import TplotModal from '../components/TplotModal.vue'
 import { useChart, darkTooltip, cssVar, speciesColor } from '../utils/echarts.js'
 import { fmt, copyText } from '../utils/ui.js'
 
@@ -27,6 +28,15 @@ const sirnaPageCount = ref(1)
 const initiators = ref([])
 const loading = ref(true)
 const error = ref('')
+const tplot = ref(null)
+
+function openTplot(it) {
+    if (!it?.tplot) return
+    tplot.value = {
+        src: `${import.meta.env.BASE_URL}${it.tplot}`,
+        title: it.mirna || t('tplot.title'),
+    }
+}
 
 const fmtP = (v) =>
     v === null || v === undefined
@@ -477,6 +487,7 @@ watch(
                                         <th scope="col">{{ t('col.initiatorSeq') }}</th>
                                         <th scope="col">{{ t('col.length') }}</th>
                                         <th scope="col">{{ t('col.verified') }}</th>
+                                        <th scope="col">{{ t('col.tplot') }}</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -500,6 +511,17 @@ watch(
                                                 {{ it.verified === 'yes' ? t('common.yes') : t('common.no') }}
                                             </span>
                                         </td>
+                                        <td class="mono">
+                                            <button
+                                                v-if="it.tplot"
+                                                type="button"
+                                                class="btn btn--ghost btn--sm"
+                                                @click="openTplot(it)"
+                                            >
+                                                {{ t('col.tplot') }}
+                                            </button>
+                                            <span v-else class="dim">{{ t('common.empty') }}</span>
+                                        </td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -508,6 +530,13 @@ watch(
                 </div>
             </div>
         </template>
+
+        <TplotModal
+            :open="!!tplot"
+            :src="tplot?.src || ''"
+            :title="tplot?.title || ''"
+            @close="tplot = null"
+        />
     </div>
 </template>
 

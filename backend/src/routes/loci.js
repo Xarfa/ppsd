@@ -7,6 +7,7 @@
  */
 import { Router } from 'express';
 import { query } from '../db/index.js';
+import { tplotUrl } from '../tplot.js';
 
 export const lociRouter = Router();
 
@@ -149,14 +150,21 @@ lociRouter.get('/loci/:id/phasi-rna', async (req, res, next) => {
 lociRouter.get('/loci/:id/initiators', async (req, res, next) => {
   try {
     const { rows } = await query(
-      `SELECT id, mirna, geneid, cleavege_site, target_pos_end, posmax_min, distance,
+      `SELECT id, species, mirna, geneid, cleavege_site, target_pos_end, posmax_min, distance,
               initiator_seq, initiator_len, verified, degradome, category, deg_count, t_plot
        FROM initiator
        WHERE phas_gene = $1
        ORDER BY id`,
       [req.params.id],
     );
-    res.json({ total: rows.length, rows });
+
+    // 老站只有 verified=yes 的 initiator 才显示 T-plot；文件不存在也不给 URL
+    const withPlot = rows.map((r) => ({
+      ...r,
+      tplot: r.verified === 'yes' ? tplotUrl('initiator', r.species, r.t_plot) : null,
+    }));
+
+    res.json({ total: withPlot.length, rows: withPlot });
   } catch (e) {
     next(e);
   }

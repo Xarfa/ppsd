@@ -30,10 +30,24 @@ import { downloadsRouter } from './routes/downloads.js';
 import { blastRouter } from './routes/blast.js';
 import { treeRouter } from './routes/tree.js';
 import { atlasRouter } from './routes/atlas.js';
+import { getTplotDir } from './tplot.js';
 
 const app = express();
 app.use(cors());
 app.use(express.json());
+
+/* 老站 tplot 图片（5.7 万张，不拷进 dist）——直接只读托管老目录 */
+const tplotDir = getTplotDir();
+if (fs.existsSync(tplotDir)) {
+  const tplotOpts = { maxAge: '30d', immutable: true };
+  app.use('/PPSD_new/tplot', express.static(tplotDir, tplotOpts));
+  app.use('/tplot', express.static(tplotDir, tplotOpts));
+  console.log(`  tplot: ${tplotDir}`);
+} else {
+  console.warn(`  ⚠ tplot 目录不存在: ${tplotDir}`);
+}
+/* 图片缺失时明确 404，不要落进 SPA 兜底返回 index.html */
+app.use(['/tplot', '/PPSD_new/tplot'], (_req, res) => res.status(404).send('tplot not found'));
 
 /* 静态托管前端构建产物（dist/ 存在时）—— 分享包/服务器部署都是单进程：
    node src/server.js 同时提供 API 和页面。

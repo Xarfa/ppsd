@@ -9,6 +9,7 @@ import { ref, computed, watch, onMounted, nextTick } from 'vue'
 import { useRoute, RouterLink } from 'vue-router'
 import api, { speciesName } from '../api/ppsd.js'
 import { t } from '../i18n/index.js'
+import TplotModal from '../components/TplotModal.vue'
 import { useChart, darkTooltip, cssVar, speciesColor } from '../utils/echarts.js'
 import { fmt, copyText } from '../utils/ui.js'
 
@@ -16,6 +17,15 @@ const route = useRoute()
 const data = ref(null)
 const loading = ref(true)
 const error = ref('')
+const tplot = ref(null)
+
+function openTplot(tg) {
+    if (!tg?.tplot) return
+    tplot.value = {
+        src: `${import.meta.env.BASE_URL}${tg.tplot}`,
+        title: tg.verified_target || t('tplot.title'),
+    }
+}
 
 const basicRows = computed(() => {
     const d = data.value
@@ -229,6 +239,7 @@ watch(() => route.params.id, fetchData)
                                         <th scope="col">{{ t('col.category') }}</th>
                                         <th scope="col">{{ t('col.degCount') }}</th>
                                         <th scope="col">{{ t('col.shift') }}</th>
+                                        <th scope="col">{{ t('col.tplot') }}</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -249,6 +260,17 @@ watch(() => route.params.id, fetchData)
                                         </td>
                                         <td class="mono">{{ tg.deg_count ?? t('common.empty') }}</td>
                                         <td class="mono">{{ tg.shift ?? t('common.empty') }}</td>
+                                        <td class="mono">
+                                            <button
+                                                v-if="tg.tplot"
+                                                type="button"
+                                                class="btn btn--ghost btn--sm"
+                                                @click="openTplot(tg)"
+                                            >
+                                                {{ t('col.tplot') }}
+                                            </button>
+                                            <span v-else class="dim">{{ t('common.empty') }}</span>
+                                        </td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -266,6 +288,13 @@ watch(() => route.params.id, fetchData)
                 </div>
             </div>
         </template>
+
+        <TplotModal
+            :open="!!tplot"
+            :src="tplot?.src || ''"
+            :title="tplot?.title || ''"
+            @close="tplot = null"
+        />
     </div>
 </template>
 

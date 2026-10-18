@@ -57,6 +57,13 @@ export const config = {
     engine: (process.env.PPSD_BLAST_ENGINE || 'auto').toLowerCase(),
     timeoutMs: Number(process.env.PPSD_BLAST_TIMEOUT_MS || 30000),
   },
+
+  /**
+   * 老站 tplot 图片目录。
+   * 不填时自动探测：服务器 /home/www/html/PPSD_zby/tplot，
+   * 本地 data/reference/PPSD_zby/tplot。图片不拷进 dist，只做静态托管。
+   */
+  tplotDir: process.env.PPSD_TPOT_DIR || '',
 };
 
 /**
