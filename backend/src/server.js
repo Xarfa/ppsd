@@ -21,7 +21,7 @@ import cors from 'cors';
 import fs from 'node:fs';
 import path from 'node:path';
 import { config, paths } from './config.js';
-import { getDriverName, getServerVersion, query } from './db/index.js';
+import { getDriverName, getServerVersion, query, closeDb } from './db/index.js';
 import { speciesRouter } from './routes/species.js';
 import { lociRouter } from './routes/loci.js';
 import { phasiRnaRouter } from './routes/phasi-rna.js';
@@ -120,6 +120,23 @@ app.get(/^\/(?!api|PPSD_new\/api).*/, (_req, res) => {
   if (fs.existsSync(index)) res.sendFile(index);
   else res.status(404).send('dist/ not built — run `npm run build` first');
 });
+
+/* 优雅关闭：stop.sh/restart.sh 发 SIGTERM，必须先关 pglite 再退出。
+   直接杀进程可能留下未完成的 WAL，下次启动会卡在数据库恢复。 */
+let shuttingDown = false;
+async function shutdown(signal) {
+  if (shuttingDown) return;
+  shuttingDown = true;
+  console.log(`\n收到 ${signal}，正在关闭数据库...`);
+  try {
+    await closeDb();
+  } catch (e) {
+    console.warn(`  关闭数据库失败: ${e.message}`);
+  }
+  process.exit(0);
+}
+process.on('SIGINT', () => shutdown('SIGINT'));
+process.on('SIGTERM', () => shutdown('SIGTERM'));
 
 app.listen(config.port, async () => {
   console.log(`PPSD backend 已启动: http://localhost:${config.port}`);

@@ -12,6 +12,14 @@
 #   "[n]ode ..."，模式却仍然只匹配真正的 node 进程 —— 自己匹配不到自己。
 # ===========================================================================
 if pkill -f "[n]ode src/server.js"; then
+    # SIGTERM 会触发 server.js 的优雅关闭（先 closeDb 再退出）。
+    # 等它真正退出再返回，避免 restart.sh 立刻启动时抢不到数据库锁。
+    for _ in $(seq 1 20); do
+        if ! pgrep -f "[n]ode src/server.js" >/dev/null 2>&1; then
+            break
+        fi
+        sleep 0.5
+    done
     echo "已停止 PPSD 后端"
 else
     echo "没有正在运行的 PPSD 后端（或已经停了）"

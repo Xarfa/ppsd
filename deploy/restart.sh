@@ -4,7 +4,8 @@
 #
 # 用法： bash ~/ppsd-26/app/restart.sh
 #
-# 做三件事：停 → 等 2 秒让端口释放 → 后台启动 → 等 3 秒 → 打一次健康检查
+# 做三件事：停 → 等 2 秒让端口释放 → 后台启动 → 轮询健康检查
+# （pglite 启动/恢复可能要几十秒，所以健康检查最多等 60 秒）
 # ===========================================================================
 set -uo pipefail
 
@@ -19,7 +20,15 @@ sleep 2
 echo "② 后台启动"
 nohup bash "$PPSD_HOME/start.sh" > "$PPSD_HOME/backend.log" 2>&1 &
 
-echo "③ 等它起来，然后做健康检查"
-sleep 4
-curl -s --max-time 15 http://localhost:3618/api/health
-echo
+echo "③ 等它起来，然后做健康检查（最多 60 秒）"
+for _ in $(seq 1 30); do
+    out="$(curl -s --max-time 3 http://localhost:3618/api/health 2>/dev/null || true)"
+    if [ -n "$out" ]; then
+        echo "$out"
+        exit 0
+    fi
+    sleep 2
+done
+
+echo "健康检查超时。看日志：tail -50 $PPSD_HOME/backend.log" >&2
+exit 1
