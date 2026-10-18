@@ -38,6 +38,12 @@ function openTplot(it) {
     }
 }
 
+/** 只有水稻 chr11 的位点后端才会给 jbrowse；其他物种/染色体为 null */
+const jbrowseHref = computed(() => {
+    const jb = locus.value?.jbrowse
+    return jb?.url ? `${import.meta.env.BASE_URL}${jb.url}` : null
+})
+
 const fmtP = (v) =>
     v === null || v === undefined
         ? t('common.empty')
@@ -307,6 +313,15 @@ watch(
                             </div>
                         </div>
                         <div class="spacer"></div>
+                        <a
+                            v-if="jbrowseHref"
+                            :href="jbrowseHref"
+                            target="_blank"
+                            rel="noopener"
+                            class="btn btn--secondary btn--sm"
+                        >
+                            {{ t('detail.jbrowse') }}
+                        </a>
                         <button class="btn btn--secondary btn--sm" @click="copyText(locus.phas_loci, t('ux.copied'))">
                             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                 <rect x="9" y="9" width="12" height="12" rx="2" />

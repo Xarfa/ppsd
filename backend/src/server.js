@@ -31,6 +31,7 @@ import { blastRouter } from './routes/blast.js';
 import { treeRouter } from './routes/tree.js';
 import { atlasRouter } from './routes/atlas.js';
 import { getTplotDir } from './tplot.js';
+import { getJbrowseDir } from './jbrowse.js';
 
 const app = express();
 app.use(cors());
@@ -48,6 +49,17 @@ if (fs.existsSync(tplotDir)) {
 }
 /* 图片缺失时明确 404，不要落进 SPA 兜底返回 index.html */
 app.use(['/tplot', '/PPSD_new/tplot'], (_req, res) => res.status(404).send('tplot not found'));
+
+/* 老站 JBrowse 静态实例（3.3G / 11.9 万文件，不拷进 dist） */
+const jbrowseDir = getJbrowseDir();
+if (fs.existsSync(jbrowseDir)) {
+  app.use('/PPSD_new/jbrowse', express.static(jbrowseDir, { maxAge: '7d' }));
+  app.use('/jbrowse', express.static(jbrowseDir, { maxAge: '7d' }));
+  console.log(`  jbrowse: ${jbrowseDir}`);
+} else {
+  console.warn(`  ⚠ JBrowse 目录不存在: ${jbrowseDir}`);
+}
+app.use(['/jbrowse', '/PPSD_new/jbrowse'], (_req, res) => res.status(404).send('jbrowse not found'));
 
 /* 静态托管前端构建产物（dist/ 存在时）—— 分享包/服务器部署都是单进程：
    node src/server.js 同时提供 API 和页面。

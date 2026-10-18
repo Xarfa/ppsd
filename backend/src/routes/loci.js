@@ -8,6 +8,7 @@
 import { Router } from 'express';
 import { query } from '../db/index.js';
 import { tplotUrl } from '../tplot.js';
+import { jbrowseUrl } from '../jbrowse.js';
 
 export const lociRouter = Router();
 
@@ -107,7 +108,16 @@ lociRouter.get('/loci/:id', async (req, res, next) => {
       [req.params.id],
     );
     if (rows.length === 0) return res.status(404).json({ error: 'not_found', message: `PHAS locus not found: ${req.params.id}` });
-    res.json(rows[0]);
+
+    // 只有水稻 chr11 能映射到老站 JBrowse 的 refseq；其他返回 null
+    const row = rows[0];
+    row.jbrowse = jbrowseUrl({
+      species: row.species,
+      chromosome: row.chromosome,
+      start: row.genome_start,
+      end: row.genome_end,
+    });
+    res.json(row);
   } catch (e) {
     next(e);
   }

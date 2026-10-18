@@ -64,6 +64,13 @@ export const config = {
    * 本地 data/reference/PPSD_zby/tplot。图片不拷进 dist，只做静态托管。
    */
   tplotDir: process.env.PPSD_TPOT_DIR || '',
+
+  /**
+   * 老站 JBrowse 静态实例目录（JBrowse 1.16.11，仅水稻 chr11）。
+   * 不填时自动探测：服务器 /home/www/html/PPSD_zby/JBrowse/jbrowse，
+   * 本地 data/reference/PPSD_zby/JBrowse/jbrowse。
+   */
+  jbrowseDir: process.env.PPSD_JBROWSE_DIR || '',
 };
 
 /**
