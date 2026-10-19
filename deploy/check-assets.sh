@@ -36,7 +36,8 @@ curl -s -o /dev/null -w "trackList.json  HTTP %{http_code}\n" --max-time 10 "$BA
 echo
 
 echo "=== 5. NCBI BLAST 实测 ==="
-echo "（如果返回 engine=js，说明 NCBI 没起来，往上翻 /api/assets 的 blast.reason）"
+echo "（应该看到 engine=ncbi、blastTask=blastn-short、hits 非空；"
+echo "  如果返回 engine=js，往上翻 /api/assets 的 blast.reason）"
 curl -s --max-time 60 -X POST "$BASE/api/blast" \
   -H "Content-Type: application/json" \
   -d '{"sequence":"CTATCAGCGGGCTTTCTTGTT","database":"phasi_rna","engine":"ncbi","maxHits":3,"maxSeqs":5,"evalue":"1e-5"}'

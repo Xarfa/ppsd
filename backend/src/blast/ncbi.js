@@ -258,11 +258,15 @@ export async function runNcbi({
     try {
         await fs.promises.writeFile(queryFile, `>query\n${sequence}\n`, 'utf-8');
 
+        // 21 nt 的 phasiRNA 查询用 NCBI 推荐的 blastn-short：
+        // 默认 blastn 的完全匹配 E 值约 1.09e-05，会被默认 1e-5 阈值挡掉；
+        // blastn-short 的同一命中 E 值约 2.17e-06，能正常返回。
+        const task = sequence.length < 30 ? 'blastn-short' : 'blastn';
         const commonArgs = [
             '-query', queryFile,
             '-db', dbPath,
             '-evalue', ev,
-            '-task', 'blastn',
+            '-task', task,
             '-dust', 'no',
         ];
         const execOpts = {
@@ -329,6 +333,7 @@ export async function runNcbi({
             database: dbKey,
             databaseLabel: spec.label,
             blastDatabase: spec.blastDb,
+            blastTask: task,
             evalue: ev,
             maxSeqs: requested,
             // NCBI 已经按 E 值筛过；这里给的是去重后的 subject 数
