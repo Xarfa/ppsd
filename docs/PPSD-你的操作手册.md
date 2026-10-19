@@ -244,6 +244,9 @@ bash $PPSD/check-assets.sh
 > 三块资产默认直接读 `/home/www/html/PPSD_zby/`：
 > `blast/`（NCBI BLAST+）、`tplot/`（表达图）、`JBrowse/jbrowse/`（水稻 chr11）。
 > 不拷进项目，所以部署包还是约 26 MB。缺的物种/图不会报错，前端会自动不显示按钮。
+>
+> 位点结构图 `plot/` 不在 Node 自动托管范围内，部署时复制到 dist：
+> `cp -a /home/www/html/PPSD_zby/plot $PPSD/dist/plot`（约 1.2G / 2.6 万张，服务器本地拷贝约 20 秒）。
 
 **这几条都过 = 服务器这边的部署完全成功。** 剩下的只是"怎么让浏览器访问到"。
 
