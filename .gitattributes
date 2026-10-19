@@ -1,0 +1,5 @@
+* text=auto
+
+# Linux 服务器脚本必须 LF；Windows 打包脚本保持 CRLF
+*.sh text eol=lf
+*.ps1 text eol=crlf
