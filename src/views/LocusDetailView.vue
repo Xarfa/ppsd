@@ -11,7 +11,7 @@
 <script setup>
 import { ref, computed, watch, onMounted, onBeforeUnmount, nextTick } from 'vue'
 import { useRoute, RouterLink } from 'vue-router'
-import api, { speciesName } from '../api/ppsd.js'
+import api, { speciesName, IS_DEMO } from '../api/ppsd.js'
 import { t, locale } from '../i18n/index.js'
 import TplotModal from '../components/TplotModal.vue'
 import { useChart, darkTooltip, cssVar, speciesColor } from '../utils/echarts.js'
@@ -107,8 +107,11 @@ const medianGap = computed(() => {
    图片属于静态资产，部署时把老站 plot/ 目录放到站点根下即可生效；
    路径必须带构建 base（/PPSD_new/），否则在 /locus/:id 下会解析成
    /PPSD_new/locus/plot/... 而 404。
-   本地开发/演示版没有这个目录，img onerror 后显示提示。 */
+   本地开发/演示版没有这个目录，img onerror 后显示提示。
+   演示版（单文件）连提示也不显示：那里既没有 plot/ 目录也不会有管理员去补，
+   显示一张坏图加一句"请管理员复制目录"只会让公开演示显得残缺。 */
 const legacyPlot = computed(() => {
+    if (IS_DEMO) return null
     const l = locus.value
     if (!l?.recorder || !l.scientific_name) return null
     const span = (l.phas_loci.match(/@(\d+)#/) || [])[1] || '21'
